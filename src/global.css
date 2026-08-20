@@ -1,0 +1,464 @@
+/* =========================================================
+   MyVitrine — Tela de Login
+   Paleta: rosa como cor de destaque, fundo claro, alto contraste
+   ========================================================= */
+
+:root {
+  /* Cor de marca */
+  --primary: #B23A66;
+  --primary-dark: #8C2C4F;
+  --primary-tint: #F6E4EC;
+
+  /* Neutros */
+  --background: #FBF8F8;
+  --surface: #FFFFFF;
+  --text: #241A20;
+  --text-secondary: #6E5F65;
+  --border: #E7DEE1;
+
+  /* Estado */
+  --error: #B3261E;
+  --error-tint: #FBEAE9;
+  --focus-ring: #B23A66;
+
+  /* Tipografia */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Escala */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --shadow-sm: 0 1px 2px rgba(36, 26, 32, 0.06);
+  --shadow-md: 0 12px 32px -12px rgba(36, 26, 32, 0.18);
+}
+
+/* Reset básico */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--background);
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+/* Foco visível em todos os elementos interativos */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* =========================================================
+   Layout geral
+   ========================================================= */
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Painel de marca (lado esquerdo)
+   ========================================================= */
+
+.brand-panel {
+  background: linear-gradient(160deg, var(--primary-tint) 0%, #FBF8F8 65%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .brand-panel {
+    padding: 48px 32px 32px;
+  }
+}
+
+.brand-panel__content {
+  max-width: 460px;
+}
+
+.brand-panel__mark {
+  margin-bottom: 40px;
+  width: 84px;
+}
+
+.brand-panel__grid rect {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+}
+
+.brand-panel__grid rect:nth-child(3),
+.brand-panel__grid rect:nth-child(7) {
+  fill: var(--primary);
+  stroke: none;
+}
+
+.brand-panel__eyebrow {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-dark);
+  margin: 0 0 18px;
+}
+
+.brand-panel__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(30px, 3.4vw, 42px);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+  color: var(--text);
+}
+
+.brand-panel__text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 380px;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .brand-panel__text {
+    display: none;
+  }
+}
+
+/* =========================================================
+   Painel de login (lado direito)
+   ========================================================= */
+
+.login-panel {
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card__header {
+  margin-bottom: 32px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  margin-bottom: 28px;
+}
+
+.logo__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: inline-block;
+}
+
+.login-card__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 28px;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.login-card__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* =========================================================
+   Formulário
+   ========================================================= */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  font: inherit;
+  font-size: 15px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+  min-height: 46px;
+  transition: border-color 0.15s ease;
+}
+
+input[type="email"]::placeholder,
+input[type="password"]::placeholder {
+  color: #A79BA0;
+}
+
+input[type="email"]:hover,
+input[type="password"]:hover {
+  border-color: #CBB9C2;
+}
+
+input[type="email"][aria-invalid="true"],
+input[type="password"][aria-invalid="true"] {
+  border-color: var(--error);
+  background: var(--error-tint);
+}
+
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input input {
+  padding-right: 46px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 4px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.field__error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error);
+  font-weight: 500;
+}
+
+.link-inline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+.link-inline:hover {
+  text-decoration: underline;
+}
+
+/* Checkbox acessível */
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox__box {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  flex-shrink: 0;
+  position: relative;
+  background: var(--surface);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.checkbox input:checked + .checkbox__box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox input:checked + .checkbox__box::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox input:focus-visible + .checkbox__box {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Botão principal */
+
+.btn-primary {
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  min-height: 48px;
+  padding: 0 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.15s ease, transform 0.05s ease;
+  margin-top: 4px;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Alerta geral do formulário */
+
+.form-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--error-tint);
+  color: var(--error);
+  border: 1px solid #F0C9C6;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-alert__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.form-alert--success {
+  background: #E9F5EC;
+  color: #1E6B3C;
+  border-color: #BFE3C9;
+}
+
+/* Rodapé do card */
+
+.login-card__footer {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.link-strong {
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+.link-strong:hover {
+  text-decoration: underline;
+}
+
+/* Redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
