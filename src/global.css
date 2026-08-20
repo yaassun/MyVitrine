@@ -450,10 +450,59 @@ input[type="password"][aria-invalid="true"] {
   font-weight: 700;
   color: var(--primary-dark);
   text-decoration: none;
+  cursor: pointer;
 }
 
 .link-strong:hover {
   text-decoration: underline;
+}
+
+/* =========================================================
+   Placeholder de próxima etapa (seleção de tipo de usuário)
+   Usado apenas para demonstrar a navegação pós-cadastro.
+   ========================================================= */
+
+.page-placeholder {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  padding: 32px;
+}
+
+.page-placeholder__card {
+  max-width: 420px;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.page-placeholder__eyebrow {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-dark);
+  margin: 0 0 12px;
+}
+
+.page-placeholder__card h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+
+.page-placeholder__card p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  margin: 0 0 24px;
 }
 
 /* Redução de movimento */

@@ -1,6 +1,15 @@
 import { useState } from "react";
 
-function PasswordField({ id, label, value, onChange, error, forgotPasswordSlot }) {
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  error,
+  forgotPasswordSlot,
+  placeholder = "Digite sua senha",
+  autoComplete = "current-password",
+}) {
   const [visible, setVisible] = useState(false);
   const errorId = `${id}-error`;
 
@@ -16,8 +25,8 @@ function PasswordField({ id, label, value, onChange, error, forgotPasswordSlot }
           type={visible ? "text" : "password"}
           id={id}
           name={id}
-          autoComplete="current-password"
-          placeholder="Digite sua senha"
+          autoComplete={autoComplete}
+          placeholder={placeholder}
           value={value}
           onChange={onChange}
           aria-describedby={errorId}

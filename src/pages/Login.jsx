@@ -1,7 +1,9 @@
 import { useState } from "react";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
+import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
+import TextField from "../components/TextField.jsx";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,7 +14,7 @@ const MOCK_USER = {
   password: "123456",
 };
 
-function Login() {
+function Login({ onNavigateToSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -68,6 +70,11 @@ function Login() {
     setAlert({ message: "Recuperação de senha em breve.", variant: "error" });
   }
 
+  function handleSignupClick(event) {
+    event.preventDefault();
+    onNavigateToSignup?.();
+  }
+
   return (
     <div className="page">
       <BrandPanel />
@@ -75,10 +82,7 @@ function Login() {
       <main className="login-panel">
         <div className="login-card">
           <div className="login-card__header">
-            <span className="logo">
-              <span className="logo__dot" aria-hidden="true"></span>
-              MyVitrine
-            </span>
+            <Logo />
             <h2 className="login-card__title">Bem-vindo de volta</h2>
             <p className="login-card__subtitle">Entre com sua conta para continuar.</p>
           </div>
@@ -86,23 +90,16 @@ function Login() {
           <form className="login-form" onSubmit={handleSubmit} noValidate>
             <FormAlert message={alert.message} variant={alert.variant} />
 
-            <div className="field">
-              <label htmlFor="email">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                autoComplete="username"
-                placeholder="voce@exemplo.com"
-                value={email}
-                onChange={handleEmailChange}
-                aria-describedby="email-error"
-                aria-invalid={Boolean(errors.email)}
-              />
-              <p className="field__error" id="email-error" hidden={!errors.email}>
-                {errors.email}
-              </p>
-            </div>
+            <TextField
+              id="email"
+              label="E-mail"
+              type="email"
+              autoComplete="username"
+              placeholder="voce@exemplo.com"
+              value={email}
+              onChange={handleEmailChange}
+              error={errors.email}
+            />
 
             <PasswordField
               id="password"
@@ -137,7 +134,10 @@ function Login() {
           </form>
 
           <p className="login-card__footer">
-            Ainda não tem uma conta? <a href="#" className="link-strong">Cadastre-se</a>
+            Ainda não tem uma conta?{" "}
+            <a href="#" className="link-strong" onClick={handleSignupClick}>
+              Cadastre-se
+            </a>
           </p>
         </div>
       </main>
