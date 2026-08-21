@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
-
+import { useState } from "react";
 import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
 import SelecaoPerfil from "./pages/SelecaoPerfil.jsx";
@@ -12,39 +7,94 @@ import PerfilAfiliado from "./pages/PerfilAfiliado.jsx";
 import PerfilCriador from "./pages/PerfilCriador.jsx";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 
+// Navegação simples baseada em estado, sem biblioteca de rotas por enquanto.
+// Quando os dashboards completos forem criados, este é o lugar para
+// introduzir um roteador de verdade (ex.: react-router-dom).
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
+  const [screen, setScreen] = useState("login");
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  // Guarda os dados de perfil preenchidos em cada etapa. Ainda não há
+  // persistência real (backend/API); serve apenas para demonstrar o fluxo.
+  const [storeProfile, setStoreProfile] = useState(null);
+  const [affiliateProfile, setAffiliateProfile] = useState(null);
+  const [creatorProfile, setCreatorProfile] = useState(null);
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+  if (screen === "signup") {
+    return (
+      <Cadastro
+        onNavigateToLogin={() => setScreen("login")}
+        onSignupSuccess={() => setScreen("select-profile")}
+      />
+    );
+  }
 
-        <Route
-          path="/cadastro"
-          element={<Cadastro />}
-        />
+  if (screen === "select-profile") {
+    return (
+      <SelecaoPerfil
+        onNavigateToCadastro={() => setScreen("signup")}
+        onProfileSelected={(profile) => {
+          setSelectedProfile(profile);
+          // Lojista, afiliado e criador já possuem a etapa de perfil implementada.
+          if (profile === "lojista") {
+            setScreen("lojista-profile");
+          } else if (profile === "afiliado") {
+            setScreen("afiliado-profile");
+          } else if (profile === "criador") {
+            setScreen("criador-profile");
+          } else {
+            setScreen("dashboard");
+          }
+        }}
+      />
+    );
+  }
 
-        <Route
-          path="/selecionar-perfil"
-          element={<SelecaoPerfil />}
-        />
+  if (screen === "lojista-profile") {
+    return (
+      <PerfilLojista
+        onNavigateBack={() => setScreen("select-profile")}
+        onProfileComplete={(data) => {
+          setStoreProfile(data);
+          setScreen("dashboard");
+        }}
+      />
+    );
+  }
 
-        <Route
-          path="/perfil-lojista"
-          element={<PerfilLojista />}
-        />
+  if (screen === "afiliado-profile") {
+    return (
+      <PerfilAfiliado
+        onNavigateBack={() => setScreen("select-profile")}
+        onProfileComplete={(data) => {
+          setAffiliateProfile(data);
+          setScreen("dashboard");
+        }}
+      />
+    );
+  }
 
-        <Route
-          path="/dashboard"
-          element={<DashboardPlaceholder />}
-        />
+  if (screen === "criador-profile") {
+    return (
+      <PerfilCriador
+        onNavigateBack={() => setScreen("select-profile")}
+        onProfileComplete={(data) => {
+          setCreatorProfile(data);
+          setScreen("dashboard");
+        }}
+      />
+    );
+  }
 
-      </Routes>
-    </BrowserRouter>
-  );
+  if (screen === "dashboard") {
+    return (
+      <DashboardPlaceholder
+        profile={selectedProfile}
+        onNavigateToLogin={() => setScreen("login")}
+      />
+    );
+  }
+
+  return <Login onNavigateToSignup={() => setScreen("signup")} />;
 }
 
 export default App;

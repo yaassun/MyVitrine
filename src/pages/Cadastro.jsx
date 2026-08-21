@@ -4,11 +4,10 @@ import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
-import { Link } from "react-router-dom";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function Cadastro({onSignupSuccess }) {
+function Cadastro({ onNavigateToLogin, onSignupSuccess }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -96,6 +95,11 @@ function Cadastro({onSignupSuccess }) {
     }, 900);
   }
 
+  function handleLoginClick(event) {
+    event.preventDefault();
+    onNavigateToLogin?.();
+  }
+
   return (
     <div className="page">
       <BrandPanel />
@@ -162,9 +166,9 @@ function Cadastro({onSignupSuccess }) {
 
           <p className="login-card__footer">
             Já possui uma conta?{" "}
-            <Link to="/login" className="link-strong">
+            <a href="#" className="link-strong" onClick={handleLoginClick}>
               Entrar
-            </Link>
+            </a>
           </p>
         </div>
       </main>

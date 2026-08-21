@@ -4,7 +4,6 @@ import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
-import { Link } from "react-router-dom";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,7 +14,7 @@ const MOCK_USER = {
   password: "123456",
 };
 
-function Login() {
+function Login({ onNavigateToSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -61,12 +60,6 @@ function Login() {
         message: "Login simulado com sucesso! (fluxo real ainda não implementado)",
         variant: "success",
       });
-
-      setTimeout(() => {
-        // Aqui você pode redirecionar o usuário para a próxima página após o login simulado.
-        window.location.href = "/dashboard"; 
-      }, 1000);
-
     } else {
       setAlert({ message: "E-mail ou senha inválidos.", variant: "error" });
     }
@@ -75,6 +68,11 @@ function Login() {
   function handleForgotPassword(event) {
     event.preventDefault();
     setAlert({ message: "Recuperação de senha em breve.", variant: "error" });
+  }
+
+  function handleSignupClick(event) {
+    event.preventDefault();
+    onNavigateToSignup?.();
   }
 
   return (
@@ -110,9 +108,9 @@ function Login() {
               onChange={handlePasswordChange}
               error={errors.password}
               forgotPasswordSlot={
-                <Link to="/recuperar-senha" className="link-strong">
+                <a href="#" className="link-inline" onClick={handleForgotPassword}>
                   Esqueceu a senha?
-                </Link>
+                </a>
               }
             />
 
@@ -137,9 +135,9 @@ function Login() {
 
           <p className="login-card__footer">
             Ainda não tem uma conta?{" "}
-            <Link to="/cadastro" className="link-strong">
+            <a href="#" className="link-strong" onClick={handleSignupClick}>
               Cadastre-se
-            </Link>
+            </a>
           </p>
         </div>
       </main>
