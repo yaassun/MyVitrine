@@ -4,6 +4,7 @@ import Cadastro from "./pages/Cadastro.jsx";
 import SelecaoPerfil from "./pages/SelecaoPerfil.jsx";
 import PerfilLojista from "./pages/PerfilLojista.jsx";
 import PerfilAfiliado from "./pages/PerfilAfiliado.jsx";
+import PerfilCriador from "./pages/PerfilCriador.jsx";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 
 // Navegação simples baseada em estado, sem biblioteca de rotas por enquanto.
@@ -16,6 +17,7 @@ function App() {
   // persistência real (backend/API); serve apenas para demonstrar o fluxo.
   const [storeProfile, setStoreProfile] = useState(null);
   const [affiliateProfile, setAffiliateProfile] = useState(null);
+  const [creatorProfile, setCreatorProfile] = useState(null);
 
   if (screen === "signup") {
     return (
@@ -32,12 +34,13 @@ function App() {
         onNavigateToCadastro={() => setScreen("signup")}
         onProfileSelected={(profile) => {
           setSelectedProfile(profile);
-          // Lojista e afiliado já possuem a etapa de perfil implementada.
-          // Criador segue direto ao placeholder até sua tela ser construída.
+          // Lojista, afiliado e criador já possuem a etapa de perfil implementada.
           if (profile === "lojista") {
             setScreen("lojista-profile");
           } else if (profile === "afiliado") {
             setScreen("afiliado-profile");
+          } else if (profile === "criador") {
+            setScreen("criador-profile");
           } else {
             setScreen("dashboard");
           }
@@ -64,6 +67,18 @@ function App() {
         onNavigateBack={() => setScreen("select-profile")}
         onProfileComplete={(data) => {
           setAffiliateProfile(data);
+          setScreen("dashboard");
+        }}
+      />
+    );
+  }
+
+  if (screen === "criador-profile") {
+    return (
+      <PerfilCriador
+        onNavigateBack={() => setScreen("select-profile")}
+        onProfileComplete={(data) => {
+          setCreatorProfile(data);
           setScreen("dashboard");
         }}
       />
