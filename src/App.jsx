@@ -1,65 +1,48 @@
-import { useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
 import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
 import SelecaoPerfil from "./pages/SelecaoPerfil.jsx";
 import PerfilLojista from "./pages/PerfilLojista.jsx";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 
-// Navegação simples baseada em estado, sem biblioteca de rotas por enquanto.
-// Quando os dashboards completos forem criados, este é o lugar para
-// introduzir um roteador de verdade (ex.: react-router-dom).
 function App() {
-  const [screen, setScreen] = useState("login");
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  // Guarda os dados do perfil da loja preenchidos nesta etapa. Ainda não há
-  // persistência real (backend/API); serve apenas para demonstrar o fluxo.
-  const [storeProfile, setStoreProfile] = useState(null);
+  return (
+    <BrowserRouter>
+      <Routes>
 
-  if (screen === "signup") {
-    return (
-      <Cadastro
-        onNavigateToLogin={() => setScreen("login")}
-        onSignupSuccess={() => setScreen("select-profile")}
-      />
-    );
-  }
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-  if (screen === "select-profile") {
-    return (
-      <SelecaoPerfil
-        onNavigateToCadastro={() => setScreen("signup")}
-        onProfileSelected={(profile) => {
-          setSelectedProfile(profile);
-          // Somente o lojista possui a etapa de perfil da loja implementada
-          // até o momento. Afiliado e criador seguem direto ao placeholder.
-          setScreen(profile === "lojista" ? "lojista-profile" : "dashboard");
-        }}
-      />
-    );
-  }
+        <Route
+          path="/cadastro"
+          element={<Cadastro />}
+        />
 
-  if (screen === "lojista-profile") {
-    return (
-      <PerfilLojista
-        onNavigateBack={() => setScreen("select-profile")}
-        onProfileComplete={(data) => {
-          setStoreProfile(data);
-          setScreen("dashboard");
-        }}
-      />
-    );
-  }
+        <Route
+          path="/selecionar-perfil"
+          element={<SelecaoPerfil />}
+        />
 
-  if (screen === "dashboard") {
-    return (
-      <DashboardPlaceholder
-        profile={selectedProfile}
-        onNavigateToLogin={() => setScreen("login")}
-      />
-    );
-  }
+        <Route
+          path="/perfil-lojista"
+          element={<PerfilLojista />}
+        />
 
-  return <Login onNavigateToSignup={() => setScreen("signup")} />;
+        <Route
+          path="/dashboard"
+          element={<DashboardPlaceholder />}
+        />
+
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
