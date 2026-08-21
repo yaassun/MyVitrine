@@ -8,6 +8,8 @@ import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
 import SelecaoPerfil from "./pages/SelecaoPerfil.jsx";
 import PerfilLojista from "./pages/PerfilLojista.jsx";
+import PerfilAfiliado from "./pages/PerfilAfiliado.jsx";
+import PerfilCriador from "./pages/PerfilCriador.jsx";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 
 function App() {
