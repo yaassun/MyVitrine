@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
-function ProfileImageUpload({ id, label, onFileSelected }) {
+function ProfileImageUpload({
+  id,
+  label,
+  onFileSelected,
+  altText = "Prévia da imagem selecionada",
+  placeholderText = "Adicionar logo",
+}) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [fileName, setFileName] = useState("");
 
@@ -37,7 +43,7 @@ function ProfileImageUpload({ id, label, onFileSelected }) {
         {previewUrl ? (
           <img
             src={previewUrl}
-            alt="Prévia da logo selecionada"
+            alt={altText}
             className="image-upload__preview"
           />
         ) : (
@@ -56,7 +62,7 @@ function ProfileImageUpload({ id, label, onFileSelected }) {
               <circle cx="9" cy="10" r="1.75" />
               <path d="m5.5 18 5-5.5a1.5 1.5 0 0 1 2.2-.05L18.5 18" />
             </svg>
-            <span className="image-upload__text">Adicionar logo</span>
+            <span className="image-upload__text">{placeholderText}</span>
           </span>
         )}
       </label>
