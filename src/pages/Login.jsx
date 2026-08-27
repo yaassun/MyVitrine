@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -14,7 +16,10 @@ const MOCK_USER = {
   password: "123456",
 };
 
-function Login({ onNavigateToSignup }) {
+function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -57,22 +62,22 @@ function Login({ onNavigateToSignup }) {
 
     if (trimmedEmail === MOCK_USER.email && password === MOCK_USER.password) {
       setAlert({
-        message: "Login simulado com sucesso! (fluxo real ainda não implementado)",
+        message: "Login realizado! Redirecionando...",
         variant: "success",
       });
+
+      // ⚠️ Simulação apenas: enquanto não existe backend real, autenticamos
+      // localmente para permitir testar o fluxo de rotas protegidas.
+      // Assim que /api/v1/auth/login existir de verdade, troque isto por
+      // uma chamada à API (que deve setar o cookie HttpOnly de refresh e
+      // devolver o access token + dados do usuário).
+      setUser({ tipo: null });
+
+      const redirectTo = location.state?.from || "/selecionar-perfil";
+      setTimeout(() => navigate(redirectTo, { replace: true }), 600);
     } else {
       setAlert({ message: "E-mail ou senha inválidos.", variant: "error" });
     }
-  }
-
-  function handleForgotPassword(event) {
-    event.preventDefault();
-    setAlert({ message: "Recuperação de senha em breve.", variant: "error" });
-  }
-
-  function handleSignupClick(event) {
-    event.preventDefault();
-    onNavigateToSignup?.();
   }
 
   return (
@@ -108,9 +113,9 @@ function Login({ onNavigateToSignup }) {
               onChange={handlePasswordChange}
               error={errors.password}
               forgotPasswordSlot={
-                <a href="#" className="link-inline" onClick={handleForgotPassword}>
+                <Link to="/recuperar-senha" className="link-inline">
                   Esqueceu a senha?
-                </a>
+                </Link>
               }
             />
 
@@ -135,9 +140,9 @@ function Login({ onNavigateToSignup }) {
 
           <p className="login-card__footer">
             Ainda não tem uma conta?{" "}
-            <a href="#" className="link-strong" onClick={handleSignupClick}>
+            <Link to="/cadastro" className="link-strong">
               Cadastre-se
-            </a>
+            </Link>
           </p>
         </div>
       </main>

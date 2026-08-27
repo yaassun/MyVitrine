@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import Logo from "../components/Logo.jsx";
 import ProfileCard from "../components/ProfileCard.jsx";
@@ -40,17 +41,24 @@ const PROFILES = [
   },
 ];
 
-function SelecaoPerfil({ onNavigateToCadastro, onProfileSelected }) {
+const PROFILE_ROUTES = {
+  lojista: "/perfil-lojista",
+  afiliado: "/perfil-afiliado",
+  criador: "/perfil-criador",
+};
+
+function SelecaoPerfil() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
 
   function handleContinue() {
     if (!selected) return;
-    onProfileSelected?.(selected);
+    navigate(PROFILE_ROUTES[selected] || "/dashboard");
   }
 
   function handleBack(event) {
     event.preventDefault();
-    onNavigateToCadastro?.();
+    navigate("/cadastro");
   }
 
   return (

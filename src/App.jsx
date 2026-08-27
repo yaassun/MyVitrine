@@ -1,100 +1,53 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
+import ProtectedRoute from "./auth/ProtectedRoute.jsx";
+
 import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
+import RecuperarSenha from "./pages/RecuperarSenha.jsx";
+import RedefinirSenha from "./pages/RedefinirSenha.jsx";
 import SelecaoPerfil from "./pages/SelecaoPerfil.jsx";
 import PerfilLojista from "./pages/PerfilLojista.jsx";
 import PerfilAfiliado from "./pages/PerfilAfiliado.jsx";
 import PerfilCriador from "./pages/PerfilCriador.jsx";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 
-// Navegação simples baseada em estado, sem biblioteca de rotas por enquanto.
-// Quando os dashboards completos forem criados, este é o lugar para
-// introduzir um roteador de verdade (ex.: react-router-dom).
+// Decide para onde mandar o usuário quando ele acessa "/" — depende do
+// resultado do refresh feito pelo AuthProvider ao iniciar o app.
+function RootRedirect() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return null;
+
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+}
+
 function App() {
-  const [screen, setScreen] = useState("login");
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  // Guarda os dados de perfil preenchidos em cada etapa. Ainda não há
-  // persistência real (backend/API); serve apenas para demonstrar o fluxo.
-  const [storeProfile, setStoreProfile] = useState(null);
-  const [affiliateProfile, setAffiliateProfile] = useState(null);
-  const [creatorProfile, setCreatorProfile] = useState(null);
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Rotas públicas — as únicas acessíveis sem sessão válida */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
-  if (screen === "signup") {
-    return (
-      <Cadastro
-        onNavigateToLogin={() => setScreen("login")}
-        onSignupSuccess={() => setScreen("select-profile")}
-      />
-    );
-  }
+          {/* Tudo abaixo exige sessão válida (ProtectedRoute cuida disso) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/selecionar-perfil" element={<SelecaoPerfil />} />
+            <Route path="/perfil-lojista" element={<PerfilLojista />} />
+            <Route path="/perfil-afiliado" element={<PerfilAfiliado />} />
+            <Route path="/perfil-criador" element={<PerfilCriador />} />
+            <Route path="/dashboard" element={<DashboardPlaceholder />} />
+          </Route>
 
-  if (screen === "select-profile") {
-    return (
-      <SelecaoPerfil
-        onNavigateToCadastro={() => setScreen("signup")}
-        onProfileSelected={(profile) => {
-          setSelectedProfile(profile);
-          // Lojista, afiliado e criador já possuem a etapa de perfil implementada.
-          if (profile === "lojista") {
-            setScreen("lojista-profile");
-          } else if (profile === "afiliado") {
-            setScreen("afiliado-profile");
-          } else if (profile === "criador") {
-            setScreen("criador-profile");
-          } else {
-            setScreen("dashboard");
-          }
-        }}
-      />
-    );
-  }
-
-  if (screen === "lojista-profile") {
-    return (
-      <PerfilLojista
-        onNavigateBack={() => setScreen("select-profile")}
-        onProfileComplete={(data) => {
-          setStoreProfile(data);
-          setScreen("dashboard");
-        }}
-      />
-    );
-  }
-
-  if (screen === "afiliado-profile") {
-    return (
-      <PerfilAfiliado
-        onNavigateBack={() => setScreen("select-profile")}
-        onProfileComplete={(data) => {
-          setAffiliateProfile(data);
-          setScreen("dashboard");
-        }}
-      />
-    );
-  }
-
-  if (screen === "criador-profile") {
-    return (
-      <PerfilCriador
-        onNavigateBack={() => setScreen("select-profile")}
-        onProfileComplete={(data) => {
-          setCreatorProfile(data);
-          setScreen("dashboard");
-        }}
-      />
-    );
-  }
-
-  if (screen === "dashboard") {
-    return (
-      <DashboardPlaceholder
-        profile={selectedProfile}
-        onNavigateToLogin={() => setScreen("login")}
-      />
-    );
-  }
-
-  return <Login onNavigateToSignup={() => setScreen("signup")} />;
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="*" element={<RootRedirect />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
 export default App;

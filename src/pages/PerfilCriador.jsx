@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -6,6 +7,7 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 // Mesmas categorias usadas por lojistas e afiliados, para permitir
 // cruzar criadores de conteúdo com marcas e produtos do mesmo nicho.
@@ -20,7 +22,9 @@ const CATEGORIES = [
   "Outros",
 ];
 
-function PerfilCriador({ onNavigateBack, onProfileComplete }) {
+function PerfilCriador() {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [creatorName, setCreatorName] = useState("");
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -92,22 +96,16 @@ function PerfilCriador({ onNavigateBack, onProfileComplete }) {
     });
 
     setTimeout(() => {
-      onProfileComplete?.({
-        creatorName: creatorName.trim(),
-        fullName: fullName.trim(),
-        bio: bio.trim(),
-        category,
-        instagram: instagram.trim(),
-        tiktok: tiktok.trim(),
-        site: site.trim(),
-        photoFile,
-      });
+      // ⚠️ Simulação: quando existir POST /api/v1/criador/perfil de
+      // verdade, troque isto pela chamada real à API.
+      setUser((prev) => ({ ...prev, tipo: "criador" }));
+      navigate("/dashboard", { replace: true });
     }, 900);
   }
 
   function handleBack(event) {
     event.preventDefault();
-    onNavigateBack?.();
+    navigate("/selecionar-perfil");
   }
 
   return (
