@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -6,6 +7,7 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 const CATEGORIES = [
   "Moda",
@@ -18,7 +20,9 @@ const CATEGORIES = [
   "Outros",
 ];
 
-function PerfilLojista({ onNavigateBack, onProfileComplete }) {
+function PerfilLojista() {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [storeName, setStoreName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [description, setDescription] = useState("");
@@ -88,21 +92,16 @@ function PerfilLojista({ onNavigateBack, onProfileComplete }) {
     });
 
     setTimeout(() => {
-      onProfileComplete?.({
-        storeName: storeName.trim(),
-        ownerName: ownerName.trim(),
-        description: description.trim(),
-        category,
-        instagram: instagram.trim(),
-        website: website.trim(),
-        logoFile,
-      });
+      // ⚠️ Simulação: quando existir POST /api/v1/lojista/perfil de
+      // verdade, troque isto pela chamada real à API.
+      setUser((prev) => ({ ...prev, tipo: "lojista" }));
+      navigate("/dashboard", { replace: true });
     }, 900);
   }
 
   function handleBack(event) {
     event.preventDefault();
-    onNavigateBack?.();
+    navigate("/selecionar-perfil");
   }
 
   return (

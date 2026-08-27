@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -6,6 +7,7 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 // Categorias de produtos que o afiliado costuma divulgar. Mantidas
 // alinhadas às categorias de loja para facilitar o cruzamento entre
@@ -21,7 +23,9 @@ const CATEGORIES = [
   "Outros",
 ];
 
-function PerfilAfiliado({ onNavigateBack, onProfileComplete }) {
+function PerfilAfiliado() {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -89,21 +93,16 @@ function PerfilAfiliado({ onNavigateBack, onProfileComplete }) {
     });
 
     setTimeout(() => {
-      onProfileComplete?.({
-        displayName: displayName.trim(),
-        fullName: fullName.trim(),
-        bio: bio.trim(),
-        category,
-        instagram: instagram.trim(),
-        website: website.trim(),
-        photoFile,
-      });
+      // ⚠️ Simulação: quando existir POST /api/v1/afiliado/perfil de
+      // verdade, troque isto pela chamada real à API.
+      setUser((prev) => ({ ...prev, tipo: "afiliado" }));
+      navigate("/dashboard", { replace: true });
     }, 900);
   }
 
   function handleBack(event) {
     event.preventDefault();
-    onNavigateBack?.();
+    navigate("/selecionar-perfil");
   }
 
   return (

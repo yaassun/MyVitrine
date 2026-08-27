@@ -1,13 +1,17 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function Cadastro({ onNavigateToLogin, onSignupSuccess }) {
+function Cadastro() {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -90,14 +94,14 @@ function Cadastro({ onNavigateToLogin, onSignupSuccess }) {
       variant: "success",
     });
 
-    setTimeout(() => {
-      onSignupSuccess?.();
-    }, 900);
-  }
+    // ⚠️ Simulação: mesma observação do Login.jsx — assim que
+    // /api/v1/auth/register existir de verdade, troque isto pela chamada
+    // real (que deve autenticar o usuário automaticamente após o cadastro).
+    setUser({ tipo: null });
 
-  function handleLoginClick(event) {
-    event.preventDefault();
-    onNavigateToLogin?.();
+    setTimeout(() => {
+      navigate("/selecionar-perfil", { replace: true });
+    }, 900);
   }
 
   return (
@@ -166,9 +170,9 @@ function Cadastro({ onNavigateToLogin, onSignupSuccess }) {
 
           <p className="login-card__footer">
             Já possui uma conta?{" "}
-            <a href="#" className="link-strong" onClick={handleLoginClick}>
+            <Link to="/login" className="link-strong">
               Entrar
-            </a>
+            </Link>
           </p>
         </div>
       </main>
