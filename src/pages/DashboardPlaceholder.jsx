@@ -23,9 +23,6 @@ function DashboardPlaceholder() {
         <p className="page-placeholder__eyebrow">Área do {label}</p>
         <h1>Dashboard do {label} em desenvolvimento.</h1>
         <p>Essa área ainda será construída nas próximas etapas do projeto.</p>
-        <button className="btn-primary" onClick={handleLogout}>
-          Sair
-        </button>
       </div>
     </div>
   );
