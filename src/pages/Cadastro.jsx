@@ -5,9 +5,16 @@ import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
+import SelectField from "../components/SelectField.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const PROFILE_OPTIONS = [
+  { value: "STORE", label: "Lojista" },
+  { value: "AFFILIATE", label: "Afiliado" },
+  { value: "CREATOR", label: "Criador de conteúdo" },
+];
 
 function Cadastro() {
   const navigate = useNavigate();
@@ -16,12 +23,14 @@ function Cadastro() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profileType, setProfileType] = useState("STORE");
 
   const [errors, setErrors] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    profileType: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
 
@@ -42,7 +51,6 @@ function Cadastro() {
   function handlePasswordChange(event) {
     setPassword(event.target.value);
     clearFieldError("password");
-    // Se o usuário já tinha digitado a confirmação, revalida ao editar a senha.
     clearFieldError("confirmPassword");
   }
 
@@ -51,13 +59,18 @@ function Cadastro() {
     clearFieldError("confirmPassword");
   }
 
-  function handleSubmit(event) {
+  function handleProfileTypeChange(event) {
+    setProfileType(event.target.value);
+    clearFieldError("profileType");
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    const nextErrors = { name: "", email: "", password: "", confirmPassword: "" };
+    const nextErrors = { name: "", email: "", password: "", confirmPassword: "", profileType: "" };
 
     if (trimmedName === "") {
       nextErrors.name = "Informe seu nome.";
@@ -79,6 +92,10 @@ function Cadastro() {
       nextErrors.confirmPassword = "As senhas não coincidem.";
     }
 
+    if (!profileType) {
+      nextErrors.profileType = "Selecione um tipo de perfil.";
+    }
+
     setErrors(nextErrors);
 
     const hasError = Object.values(nextErrors).some(Boolean);
@@ -87,21 +104,36 @@ function Cadastro() {
       return;
     }
 
-    // Cadastro real ainda não implementado nesta etapa.
-    // Simulação apenas para exercitar a interface e a navegação.
-    setAlert({
-      message: "Conta criada com sucesso! Redirecionando para a próxima etapa...",
-      variant: "success",
-    });
+    try {
+      const response = await fetch("http://localhost:8080/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          password: password,
+          profileType: profileType,
+        }),
+      });
 
-    // ⚠️ Simulação: mesma observação do Login.jsx — assim que
-    // /api/v1/auth/register existir de verdade, troque isto pela chamada
-    // real (que deve autenticar o usuário automaticamente após o cadastro).
-    setUser({ tipo: null });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Erro ao criar a conta.");
+      }
 
-    setTimeout(() => {
-      navigate("/selecionar-perfil", { replace: true });
-    }, 900);
+      setAlert({
+        message: "Conta criada com sucesso! Redirecionando para o login...",
+        variant: "success",
+      });
+
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 1000);
+    } catch (err) {
+      setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
+    }
   }
 
   return (
@@ -114,8 +146,7 @@ function Cadastro() {
             <Logo />
             <h2 className="login-card__title">Crie sua conta</h2>
             <p className="login-card__subtitle">
-              Cadastre-se para começar. Na próxima etapa você escolhe se é
-              lojista, afiliado ou criador de conteúdo.
+              Cadastre-se definindo seu perfil para começar na MyVitrine.
             </p>
           </div>
 
@@ -142,6 +173,20 @@ function Cadastro() {
               onChange={handleEmailChange}
               error={errors.email}
             />
+
+            <SelectField
+              id="profileType"
+              label="Tipo de conta"
+              value={profileType}
+              onChange={handleProfileTypeChange}
+              error={errors.profileType}
+            >
+              {PROFILE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </SelectField>
 
             <PasswordField
               id="password"

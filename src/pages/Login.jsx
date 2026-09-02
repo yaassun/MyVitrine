@@ -1,3 +1,4 @@
+import { loginUser } from "../auth/authClient.js";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
@@ -8,13 +9,6 @@ import TextField from "../components/TextField.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Usuário fictício apenas para simular o login nesta etapa do MVP.
-// Nenhuma autenticação real ou banco de dados está implementado ainda.
-const MOCK_USER = {
-  email: "usuario@myvitrine.com",
-  password: "123456",
-};
 
 function Login() {
   const navigate = useNavigate();
@@ -37,7 +31,7 @@ function Login() {
     if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const nextErrors = { email: "", password: "" };
@@ -60,23 +54,34 @@ function Login() {
       return;
     }
 
-    if (trimmedEmail === MOCK_USER.email && password === MOCK_USER.password) {
+    try {
+      const data = await loginUser(trimmedEmail, password);
+
       setAlert({
         message: "Login realizado! Redirecionando...",
         variant: "success",
       });
 
-      // ⚠️ Simulação apenas: enquanto não existe backend real, autenticamos
-      // localmente para permitir testar o fluxo de rotas protegidas.
-      // Assim que /api/v1/auth/login existir de verdade, troque isto por
-      // uma chamada à API (que deve setar o cookie HttpOnly de refresh e
-      // devolver o access token + dados do usuário).
-      setUser({ tipo: null });
+      setUser(data.user);
 
-      const redirectTo = location.state?.from || "/selecionar-perfil";
+      let redirectTo = location.state?.from;
+      
+      if (!redirectTo) {
+        const profileType = data.user?.profileType;
+        if (profileType === "STORE") {
+          redirectTo = "/dashboard/store";
+        } else if (profileType === "AFFILIATE") {
+          redirectTo = "/dashboard/affiliate";
+        } else if (profileType === "CREATOR") {
+          redirectTo = "/dashboard/creator";
+        } else {
+          redirectTo = "/dashboard";
+        }
+      }
+
       setTimeout(() => navigate(redirectTo, { replace: true }), 600);
-    } else {
-      setAlert({ message: "E-mail ou senha inválidos.", variant: "error" });
+    } catch (err) {
+      setAlert({ message: err.message || "E-mail ou senha inválidos.", variant: "error" });
     }
   }
 

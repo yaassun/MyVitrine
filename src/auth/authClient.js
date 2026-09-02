@@ -1,22 +1,10 @@
 import { getAccessToken, setAccessToken, clearAccessToken } from "./tokenStore.js";
 
-// Ajuste para a URL real do seu backend (ex.: via variável de ambiente
-// VITE_API_URL no arquivo .env). Sem isso definido, assume localhost.
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
+// Ajuste para a URL real do seu backend na porta 8080
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 /**
  * Tenta renovar a sessão do usuário chamando /api/v1/auth/refresh.
- *
- * `credentials: "include"` é o que faz o navegador enviar o cookie
- * HttpOnly de refresh token junto da requisição — sem isso, o backend
- * não teria como saber quem é o usuário.
- *
- * Se o backend confirmar a sessão, ele deve responder com um novo
- * access token (e, idealmente, os dados básicos do usuário, incluindo
- * o tipo de perfil: lojista / afiliado / criador).
- *
- * Retorna os dados do usuário em caso de sucesso, ou `null` se a sessão
- * não pôde ser renovada (usuário deslogado / cookie expirado / inválido).
  */
 export async function refreshSession() {
   try {
@@ -31,20 +19,16 @@ export async function refreshSession() {
     }
 
     const data = await response.json();
-    // Formato esperado do backend: { accessToken: "...", user: { tipo, ... } }
     setAccessToken(data.accessToken);
     return data.user ?? null;
   } catch {
-    // Backend fora do ar, sem rede, CORS mal configurado etc.
     clearAccessToken();
     return null;
   }
 }
 
 /**
- * Wrapper simples de fetch que já inclui o access token atual (guardado
- * em memória) no header Authorization. Use para chamar endpoints
- * protegidos da API depois que a sessão estiver autenticada.
+ * Wrapper simples de fetch que já inclui o access token atual.
  */
 export async function authFetch(path, options = {}) {
   const token = getAccessToken();
@@ -60,8 +44,7 @@ export async function authFetch(path, options = {}) {
 }
 
 /**
- * Encerra a sessão: avisa o backend (que deve invalidar/limpar o cookie
- * de refresh) e limpa o access token guardado em memória no front.
+ * Encerra a sessão.
  */
 export async function logoutSession() {
   try {
@@ -72,4 +55,30 @@ export async function logoutSession() {
   } finally {
     clearAccessToken();
   }
+}
+
+/**
+ * Realiza a autenticação enviando e-mail e senha para o backend.
+ */
+export async function loginUser(email, password) {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "E-mail ou senha inválidos.");
+  }
+
+  const data = await response.json();
+  
+  if (data.accessToken) {
+    setAccessToken(data.accessToken);
+  }
+
+  return data;
 }

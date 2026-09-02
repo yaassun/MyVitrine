@@ -8,6 +8,7 @@ import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { authFetch } from "../auth/authClient.js";
 
 const CATEGORIES = [
   "Moda",
@@ -22,7 +23,7 @@ const CATEGORIES = [
 
 function PerfilLojista() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { user, setUser } = useAuth();
   const [storeName, setStoreName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [description, setDescription] = useState("");
@@ -63,7 +64,7 @@ function PerfilLojista() {
     clearFieldError("category");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const nextErrors = {
@@ -84,19 +85,38 @@ function PerfilLojista() {
       return;
     }
 
-    // Persistência real ainda não implementada nesta etapa.
-    // Os dados ficam apenas em estado React enquanto a página estiver aberta.
-    setAlert({
-      message: "Perfil da loja salvo! Redirecionando para o seu painel...",
-      variant: "success",
-    });
+    try {
+      const response = await authFetch("/api/store-profiles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          storeName,
+          ownerName,
+          description,
+          category,
+          instagram,
+          website,
+        }),
+      });
 
-    setTimeout(() => {
-      // ⚠️ Simulação: quando existir POST /api/v1/lojista/perfil de
-      // verdade, troque isto pela chamada real à API.
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Erro ao salvar o perfil da loja.");
+      }
+
+      setAlert({
+        message: "Perfil da loja salvo com sucesso no banco! Redirecionando...",
+        variant: "success",
+      });
+
       setUser((prev) => ({ ...prev, tipo: "lojista" }));
-      navigate("/dashboard", { replace: true });
-    }, 900);
+      setTimeout(() => navigate("/dashboard", { replace: true }), 900);
+    } catch (err) {
+      setAlert({ message: err.message || "Erro de conexão com o servidor.", variant: "error" });
+    }
   }
 
   function handleBack(event) {
