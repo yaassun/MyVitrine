@@ -2,15 +2,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
 
 const PROFILE_LABELS = {
-  lojista: "Lojista",
-  afiliado: "Afiliado",
-  criador: "Criador de conteúdo",
+  STORE: "Lojista",
+  AFFILIATE: "Afiliado",
+  CREATOR: "Criador de conteúdo",
 };
 
 function DashboardPlaceholder() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const label = PROFILE_LABELS[user?.tipo] || "usuário";
+  const label = PROFILE_LABELS[user?.profileType] || "usuário";
 
   async function handleLogout() {
     await logout();

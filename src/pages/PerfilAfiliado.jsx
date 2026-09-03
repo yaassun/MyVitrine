@@ -7,7 +7,6 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
-import { useAuth } from "../auth/AuthContext.jsx";
 
 // Categorias de produtos que o afiliado costuma divulgar. Mantidas
 // alinhadas às categorias de loja para facilitar o cruzamento entre
@@ -26,10 +25,8 @@ const CATEGORIES = [
 function PerfilAfiliado() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setUser } = useAuth();
   const userId = location.state?.userId;
   const [displayName, setDisplayName] = useState("");
-  const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [category, setCategory] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -58,11 +55,6 @@ function PerfilAfiliado() {
     clearFieldError("displayName");
   }
 
-  function handleFullNameChange(event) {
-    setFullName(event.target.value);
-    clearFieldError("fullName");
-  }
-
   function handleBioChange(event) {
     setBio(event.target.value);
     clearFieldError("bio");
@@ -78,7 +70,6 @@ function PerfilAfiliado() {
 
     const nextErrors = {
       displayName: displayName.trim() === "" ? "Digite seu nome de divulgação." : "",
-      fullName: fullName.trim() === "" ? "Digite seu nome completo." : "",
       bio: bio.trim() === "" ? "Conte um pouco sobre você." : "",
       category: category === "" ? "Selecione uma categoria." : "",
     };
@@ -170,17 +161,6 @@ function PerfilAfiliado() {
                 />
               </div>
             </div>
-
-            <TextField
-              id="fullName"
-              label="Nome completo"
-              autoComplete="name"
-              placeholder="Digite seu nome completo"
-              value={fullName}
-              onChange={handleFullNameChange}
-              error={errors.fullName}
-            />
-
             <SelectField
               id="category"
               label="Categoria de atuação"

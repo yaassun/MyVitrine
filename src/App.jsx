@@ -30,11 +30,9 @@ function RootRedirect() {
 // logado. Perfis sem template próprio ainda caem no placeholder genérico.
 function DashboardRouter() {
   const { user } = useAuth();
-
-  if (user?.tipo === "criador") return <DashboardCriador />;
-  if (user?.tipo === "lojista") return <DashboardLojista />;
-  if (user?.tipo === "comprador") return <DashboardComprador />;
-
+  if (user?.profileType === "CREATOR") return <DashboardCriador />;
+  if (user?.profileType === "STORE") return <DashboardLojista />;
+  if (user?.profileType === "AFFILIATE") return <DashboardComprador />; 
   return <DashboardPlaceholder />;
 }
 

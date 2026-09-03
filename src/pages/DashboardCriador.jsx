@@ -12,7 +12,7 @@ const PROPOSTAS = [];
 
 function DashboardCriador() {
   const { user } = useAuth();
-  const nome = user?.nome || "Criador";
+ const nome = user?.name || "Criador";
 
   return (
     <div className="dashboard">

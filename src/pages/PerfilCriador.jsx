@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -7,7 +7,7 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
-import { useAuth } from "../auth/AuthContext.jsx";
+
 
 // Mesmas categorias usadas por lojistas e afiliados, para permitir
 // cruzar criadores de conteúdo com marcas e produtos do mesmo nicho.
@@ -24,9 +24,14 @@ const CATEGORIES = [
 
 function PerfilCriador() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const location = useLocation();
+  const userId = location.state?.userId;
+  useEffect(() => {
+    if (!userId) {
+      navigate("/cadastro", { replace: true });
+    }
+  }, [userId, navigate]);
   const [creatorName, setCreatorName] = useState("");
-  const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [category, setCategory] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -36,7 +41,6 @@ function PerfilCriador() {
 
   const [errors, setErrors] = useState({
     creatorName: "",
-    fullName: "",
     bio: "",
     category: "",
   });
@@ -51,11 +55,6 @@ function PerfilCriador() {
     clearFieldError("creatorName");
   }
 
-  function handleFullNameChange(event) {
-    setFullName(event.target.value);
-    clearFieldError("fullName");
-  }
-
   function handleBioChange(event) {
     setBio(event.target.value);
     clearFieldError("bio");
@@ -66,13 +65,12 @@ function PerfilCriador() {
     clearFieldError("category");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const nextErrors = {
       creatorName:
         creatorName.trim() === "" ? "Digite seu nome de criador." : "",
-      fullName: fullName.trim() === "" ? "Digite seu nome completo." : "",
       bio:
         bio.trim() === ""
           ? "Conte um pouco sobre você e seu conteúdo."
@@ -87,27 +85,48 @@ function PerfilCriador() {
       setAlert({ message: "Verifique os campos destacados abaixo.", variant: "error" });
       return;
     }
+    const socialNetworks = [];
+     if (instagram.trim()) socialNetworks.push({ name: "Instagram", url: instagram.trim() });
+     if (tiktok.trim()) socialNetworks.push({ name: "TikTok", url: tiktok.trim() });
+     if (site.trim()) socialNetworks.push({ name: "Site", url: site.trim() });
 
-    // Persistência real ainda não implementada nesta etapa.
-    // Os dados ficam apenas em estado React enquanto a página estiver aberta.
-    setAlert({
-      message: "Perfil de criador salvo! Redirecionando para o seu painel...",
-      variant: "success",
-    });
+       try {
+      const response = await fetch("http://localhost:8080/api/creator-profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          creatorName: creatorName.trim(),
+          bio: bio.trim(),
+          niche: category, 
+          socialNetworks: socialNetworks,
+          profilePhotoUrl: null 
+        }),
+      });
 
-    setTimeout(() => {
-      // ⚠️ Simulação: quando existir POST /api/v1/criador/perfil de
-      // verdade, troque isto pela chamada real à API.
-      setUser((prev) => ({ ...prev, tipo: "criador" }));
-      navigate("/dashboard", { replace: true });
-    }, 900);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Erro ao criar o perfil de criador.");
+      }
+
+      setAlert({
+        message: " Redirecionando para o login...",
+        variant: "success",
+      });
+
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 1000);
+
+    } catch (err) {
+      setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
+    }
   }
 
   function handleBack(event) {
     event.preventDefault();
-    navigate("/selecionar-perfil");
+    navigate("/cadastro");
   }
-
   return (
     <div className="page">
       <BrandPanel />
@@ -147,17 +166,6 @@ function PerfilCriador() {
                 />
               </div>
             </div>
-
-            <TextField
-              id="fullName"
-              label="Nome completo"
-              autoComplete="name"
-              placeholder="Digite seu nome completo"
-              value={fullName}
-              onChange={handleFullNameChange}
-              error={errors.fullName}
-            />
-
             <SelectField
               id="category"
               label="Categoria de conteúdo"
