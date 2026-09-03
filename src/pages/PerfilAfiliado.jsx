@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -25,7 +25,9 @@ const CATEGORIES = [
 
 function PerfilAfiliado() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useAuth();
+  const userId = location.state?.userId;
   const [displayName, setDisplayName] = useState("");
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -41,6 +43,11 @@ function PerfilAfiliado() {
     category: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
+  useEffect(() => {
+    if (!userId) {
+      navigate("/cadastro", { replace: true });
+    }
+  }, [userId, navigate]);
 
   function clearFieldError(field) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
@@ -66,12 +73,11 @@ function PerfilAfiliado() {
     clearFieldError("category");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const nextErrors = {
-      displayName:
-        displayName.trim() === "" ? "Digite seu nome de divulgação." : "",
+      displayName: displayName.trim() === "" ? "Digite seu nome de divulgação." : "",
       fullName: fullName.trim() === "" ? "Digite seu nome completo." : "",
       bio: bio.trim() === "" ? "Conte um pouco sobre você." : "",
       category: category === "" ? "Selecione uma categoria." : "",
@@ -85,19 +91,39 @@ function PerfilAfiliado() {
       return;
     }
 
-    // Persistência real ainda não implementada nesta etapa.
-    // Os dados ficam apenas em estado React enquanto a página estiver aberta.
-    setAlert({
-      message: "Perfil de afiliado salvo! Redirecionando para o seu painel...",
-      variant: "success",
-    });
+    try {
+      const response = await fetch("http://localhost:8080/api/affiliate-profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          bio: bio.trim(),
+          niche: category, 
+          socialNetworks: [
+            ...(instagram.trim() ? [{ platform: "INSTAGRAM", url: instagram.trim() }] : []),
+            ...(website.trim() ? [{ platform: "WEBSITE", url: website.trim() }] : []),
+          ],
+          profilePhotoUrl: null, 
+        }),
+      });
 
-    setTimeout(() => {
-      // ⚠️ Simulação: quando existir POST /api/v1/afiliado/perfil de
-      // verdade, troque isto pela chamada real à API.
-      setUser((prev) => ({ ...prev, tipo: "afiliado" }));
-      navigate("/dashboard", { replace: true });
-    }, 900);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Erro ao salvar o perfil de afiliado.");
+      }
+
+      setAlert({
+        message: "Redirecionando para o login...",
+        variant: "success",
+      });
+
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 1200);
+
+    } catch (err) {
+      setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
+    }
   }
 
   function handleBack(event) {

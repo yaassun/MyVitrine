@@ -49,13 +49,13 @@ function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
-
-          {/* Tudo abaixo exige sessão válida (ProtectedRoute cuida disso) */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/selecionar-perfil" element={<SelecaoPerfil />} />
+          <Route path="/selecionar-perfil" element={<SelecaoPerfil />} />
             <Route path="/perfil-lojista" element={<PerfilLojista />} />
             <Route path="/perfil-afiliado" element={<PerfilAfiliado />} />
             <Route path="/perfil-criador" element={<PerfilCriador />} />
+
+          {/* Tudo abaixo exige sessão válida (ProtectedRoute cuida disso) */}
+          <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardRouter />} />
           </Route>
 

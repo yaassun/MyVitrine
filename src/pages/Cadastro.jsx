@@ -6,7 +6,7 @@ import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
 import SelectField from "../components/SelectField.jsx";
-import { useAuth } from "../auth/AuthContext.jsx";
+
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -18,7 +18,6 @@ const PROFILE_OPTIONS = [
 
 function Cadastro() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,6 +83,8 @@ function Cadastro() {
 
     if (password === "") {
       nextErrors.password = "Crie uma senha.";
+    }else if (password.length < 8) {
+      nextErrors.password = "A senha deve ter pelo menos 8 caracteres.";
     }
 
     if (confirmPassword === "") {
@@ -104,38 +105,41 @@ function Cadastro() {
       return;
     }
 
-    try {
+  try {
       const response = await fetch("http://localhost:8080/api/users", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: trimmedName,
           email: trimmedEmail,
           password: password,
-          profileType: profileType,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Erro ao criar a conta.");
+        throw new Error(errorData.message || "Erro ao criar a conta ");
       }
-
+      const userData = await response.json(); 
       setAlert({
-        message: "Conta criada com sucesso! Redirecionando para o login...",
+        message: "Redirecionando...",
         variant: "success",
       });
-
       setTimeout(() => {
-        navigate("/login", { replace: true });
+        if (profileType === "STORE") {
+          navigate("/perfil-lojista", { state: { userId: userData.id } });
+        } else if (profileType === "AFFILIATE") {
+          navigate("/perfil-afiliado", { state: { userId: userData.id } });
+        } else if (profileType === "CREATOR") {
+          navigate("/perfil-criador", { state: { userId: userData.id } });
+        }
       }, 1000);
+
     } catch (err) {
       setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
     }
+  
   }
-
   return (
     <div className="page">
       <BrandPanel />
