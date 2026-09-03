@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -7,10 +7,8 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
-import { useAuth } from "../auth/AuthContext.jsx";
-import { authFetch } from "../auth/authClient.js";
 
-const CATEGORIES = [
+const NICHES = [
   "Moda",
   "Beleza",
   "Alimentação",
@@ -23,20 +21,28 @@ const CATEGORIES = [
 
 function PerfilLojista() {
   const navigate = useNavigate();
-  const { user, setUser } = useAuth();
+  const location = useLocation();
+  const userId = location.state?.userId;
+
+  useEffect(() => {
+    if (!userId) {
+      navigate("/cadastro", { replace: true });
+    }
+  }, [userId, navigate]);
+
   const [storeName, setStoreName] = useState("");
-  const [ownerName, setOwnerName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [niche, setNiche] = useState("");
+  const [cnpj, setCnpj] = useState("");
   const [instagram, setInstagram] = useState("");
   const [website, setWebsite] = useState("");
   const [logoFile, setLogoFile] = useState(null);
 
   const [errors, setErrors] = useState({
     storeName: "",
-    ownerName: "",
     description: "",
-    category: "",
+    niche: "",
+    cnpj: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
 
@@ -49,19 +55,19 @@ function PerfilLojista() {
     clearFieldError("storeName");
   }
 
-  function handleOwnerNameChange(event) {
-    setOwnerName(event.target.value);
-    clearFieldError("ownerName");
-  }
-
   function handleDescriptionChange(event) {
     setDescription(event.target.value);
     clearFieldError("description");
   }
 
-  function handleCategoryChange(event) {
-    setCategory(event.target.value);
-    clearFieldError("category");
+  function handleNicheChange(event) {
+    setNiche(event.target.value);
+    clearFieldError("niche");
+  }
+
+  function handleCnpjChange(event) {
+    setCnpj(event.target.value);
+    clearFieldError("cnpj");
   }
 
   async function handleSubmit(event) {
@@ -69,12 +75,9 @@ function PerfilLojista() {
 
     const nextErrors = {
       storeName: storeName.trim() === "" ? "Digite o nome da sua loja." : "",
-      ownerName: ownerName.trim() === "" ? "Digite o nome do responsável." : "",
-      description:
-        description.trim() === ""
-          ? "Escreva uma breve descrição da sua loja."
-          : "",
-      category: category === "" ? "Selecione uma categoria." : "",
+      description: description.trim() === "" ? "Escreva uma breve descrição da sua loja." : "",
+      niche: niche === "" ? "Selecione um nicho." : "",
+      cnpj: cnpj.trim() === "" ? "Informe o CNPJ." : "",
     };
 
     setErrors(nextErrors);
@@ -85,43 +88,46 @@ function PerfilLojista() {
       return;
     }
 
+    const socialNetworks = [];
+    if (instagram.trim()) socialNetworks.push({ name: "Instagram", url: instagram.trim() });
+    if (website.trim()) socialNetworks.push({ name: "Site", url: website.trim() });
+
     try {
-      const response = await authFetch("/api/store-profiles", {
+      const response = await fetch("http://localhost:8080/api/creator-profiles", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user?.id,
-          storeName,
-          ownerName,
-          description,
-          category,
-          instagram,
-          website,
+          userId: userId,
+          storeName: storeName.trim(),
+          description: description.trim(),
+          niche: niche,
+          cnpj: cnpj.trim(),
+          socialNetworks: socialNetworks,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Erro ao salvar o perfil da loja.");
+        throw new Error(errorData.message || "Erro ao criar o perfil da loja.");
       }
 
       setAlert({
-        message: "Perfil da loja salvo com sucesso no banco! Redirecionando...",
+        message: "Perfil da loja criado com sucesso! Redirecionando para o login...",
         variant: "success",
       });
 
-      setUser((prev) => ({ ...prev, tipo: "lojista" }));
-      setTimeout(() => navigate("/dashboard", { replace: true }), 900);
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 1000);
+
     } catch (err) {
-      setAlert({ message: err.message || "Erro de conexão com o servidor.", variant: "error" });
+      setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
     }
   }
 
   function handleBack(event) {
     event.preventDefault();
-    navigate("/selecionar-perfil");
+    navigate("/cadastro");
   }
 
   return (
@@ -146,6 +152,8 @@ function PerfilLojista() {
               <ProfileImageUpload
                 id="storeLogo"
                 label="Nenhuma logo selecionada."
+                altText="Prévia da logo selecionada"
+                placeholderText="Adicionar logo"
                 onFileSelected={setLogoFile}
               />
 
@@ -154,7 +162,7 @@ function PerfilLojista() {
                   id="storeName"
                   label="Nome da loja"
                   autoComplete="organization"
-                  placeholder="Digite o nome da sua loja"
+                  placeholder="Como sua loja aparecerá na plataforma"
                   value={storeName}
                   onChange={handleStoreNameChange}
                   error={errors.storeName}
@@ -163,24 +171,23 @@ function PerfilLojista() {
             </div>
 
             <TextField
-              id="ownerName"
-              label="Nome do responsável"
-              autoComplete="name"
-              placeholder="Digite seu nome"
-              value={ownerName}
-              onChange={handleOwnerNameChange}
-              error={errors.ownerName}
+              id="cnpj"
+              label="CNPJ"
+              placeholder="00.000.000/0000-00"
+              value={cnpj}
+              onChange={handleCnpjChange}
+              error={errors.cnpj}
             />
 
             <SelectField
-              id="category"
-              label="Categoria da loja"
-              value={category}
-              onChange={handleCategoryChange}
-              error={errors.category}
-              placeholder="Selecione uma categoria"
+              id="niche"
+              label="Nicho da loja"
+              value={niche}
+              onChange={handleNicheChange}
+              error={errors.niche}
+              placeholder="Selecione um nicho"
             >
-              {CATEGORIES.map((option) => (
+              {NICHES.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
