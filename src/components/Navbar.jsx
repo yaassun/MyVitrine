@@ -31,7 +31,7 @@ function Navbar() {
 
     return (
       <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--background)', padding: '0.25rem', borderRadius: '12px' }}>
-        <Button to="/">Home</Button>
+        <Button to="/home">Home</Button>
         <Button to="/dashboard">Dashboard</Button>
         
         {tipo === 'lojista' && (

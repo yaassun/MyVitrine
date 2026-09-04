@@ -67,20 +67,16 @@ function Login() {
       let redirectTo = location.state?.from;
       
       if (!redirectTo) {
-        const profileType = data.user?.profileType;
-        if (profileType === "STORE") {
-          redirectTo = "/dashboard/store";
-        } else if (profileType === "AFFILIATE") {
-          redirectTo = "/dashboard/affiliate";
-        } else if (profileType === "CREATOR") {
-          redirectTo = "/dashboard/creator";
-        } else {
-          redirectTo = "/dashboard";
-        }
+        redirectTo = "/home";
       }
 
       setTimeout(() => navigate(redirectTo, { replace: true }), 600);
     } catch (err) {
+      if (err.code === "INCOMPLETE_REGISTRATION") {
+        navigate("/concluir-cadastro", { state: { email: trimmedEmail } });
+        return;
+      }
+
       setAlert({ message: err.message || "E-mail ou senha inválidos.", variant: "error" });
     }
   }

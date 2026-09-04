@@ -72,14 +72,54 @@ export async function loginUser(email, password) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    const incompleteRegistration =
+      response.status === 409 &&
+      /cadastro incompleto/i.test(errorData.message || "");
+
+    if (
+      incompleteRegistration ||
+      errorData.status === "INCOMPLETE" ||
+      errorData.registrationStatus === "INCOMPLETE" ||
+      errorData.code === "INCOMPLETE_REGISTRATION"
+    ) {
+      const error = new Error("Seu cadastro ainda não foi concluído.");
+      error.code = "INCOMPLETE_REGISTRATION";
+      throw error;
+    }
+
     throw new Error(errorData.message || "E-mail ou senha inválidos.");
   }
 
   const data = await response.json();
+
+  if (
+    data.user?.status === "INCOMPLETE" ||
+    data.user?.registrationStatus === "INCOMPLETE"
+  ) {
+    const error = new Error("Seu cadastro ainda não foi concluído.");
+    error.code = "INCOMPLETE_REGISTRATION";
+    throw error;
+  }
   
   if (data.accessToken) {
     setAccessToken(data.accessToken);
   }
 
   return data;
+}
+
+/** Recupera os dados básicos de um cadastro incompleto pelo e-mail. */
+export async function findUserByEmail(email) {
+  const response = await fetch(
+    `${API_URL}/api/users/email/${encodeURIComponent(email)}`,
+    { credentials: "include" },
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Não foi possível localizar esse cadastro.");
+  }
+
+  return data.user ?? data;
 }
