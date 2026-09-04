@@ -8,6 +8,7 @@ import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { API_URL } from "../auth/authClient.js";
 import {
   fetchStoreProfile,
   getProfileUserId,
@@ -153,7 +154,7 @@ function PerfilLojista() {
         return;
       }
 
-      const response = await fetch("http://localhost:8080/api/store-profiles", {
+      const response = await fetch(`${API_URL}/api/store-profiles`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profilePayload),

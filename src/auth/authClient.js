@@ -48,7 +48,7 @@ export async function authFetch(path, options = {}) {
  */
 export async function logoutSession() {
   try {
-    await fetch(`${API_URL}/api/v1/auth/logout`, {
+    await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });

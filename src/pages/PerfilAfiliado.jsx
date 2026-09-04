@@ -8,6 +8,7 @@ import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { API_URL } from "../auth/authClient.js";
 import {
   fetchAffiliateProfile,
   getProfileUserId,
@@ -147,7 +148,7 @@ function PerfilAfiliado() {
         return;
       }
 
-      const response = await fetch("http://localhost:8080/api/affiliate-profiles", {
+      const response = await fetch(`${API_URL}/api/affiliate-profiles`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
