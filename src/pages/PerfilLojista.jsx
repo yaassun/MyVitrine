@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -23,7 +23,9 @@ const CATEGORIES = [
 
 function PerfilLojista() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, setUser } = useAuth();
+  const userId = user?.id ?? location.state?.userId;
   const [storeName, setStoreName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [description, setDescription] = useState("");
@@ -92,7 +94,7 @@ function PerfilLojista() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: user?.id,
+          userId,
           storeName,
           ownerName,
           description,
