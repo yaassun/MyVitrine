@@ -141,12 +141,16 @@ function PerfilCriador() {
       await upsertCreatorProfile(currentUserId, profilePayload);
 
       setUser((prev) => ({ ...prev, profileType: "CREATOR", creatorName: creatorName.trim() }));
-      setAlert({
-        message: isEditing ? "Perfil atualizado com sucesso." : "Perfil criado com sucesso!",
-        variant: "success",
-      });
-
-      if (!isEditing) {
+      if (isEditing) {
+        navigate("/creator/perfil", {
+          replace: true,
+          state: { profileUpdated: true },
+        });
+      } else {
+        setAlert({
+          message: "Perfil criado com sucesso!",
+          variant: "success",
+        });
         setTimeout(() => navigate("/dashboard", { replace: true }), 900);
       }
     } catch (err) {
@@ -156,7 +160,7 @@ function PerfilCriador() {
 
   function handleBack(event) {
     event.preventDefault();
-    navigate(isEditing ? "/dashboard" : "/cadastro");
+    navigate(isEditing ? "/creator/perfil" : "/cadastro");
   }
 
   return (

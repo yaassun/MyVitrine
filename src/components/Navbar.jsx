@@ -48,7 +48,7 @@ function Navbar() {
           </>
         )}
 
-        {tipo === 'comprador' && (
+        {tipo === 'afiliado' && (
           <>
             <Button to="/lojistas">Lojistas</Button>
           </>
@@ -69,7 +69,7 @@ function Navbar() {
       <nav className="navbar__nav" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
         {renderMenuLinks()}
         
-        <Button variant="danger" onClick={handleLogout}>
+        <Button onClick={handleLogout}>
           Sair
         </Button>
       </nav>

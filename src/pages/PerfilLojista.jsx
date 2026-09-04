@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import BrandPanel from "../components/BrandPanel.jsx";
 import FormAlert from "../components/FormAlert.jsx";
 import Logo from "../components/Logo.jsx";
@@ -8,9 +8,14 @@ import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { authFetch } from "../auth/authClient.js";
+import { API_URL } from "../auth/authClient.js";
+import {
+  fetchStoreProfile,
+  getProfileUserId,
+  updateStoreProfile,
+} from "../services/profileService.js";
 
-const CATEGORIES = [
+const NICHES = [
   "Moda",
   "Beleza",
   "Alimentação",
@@ -24,23 +29,65 @@ const CATEGORIES = [
 function PerfilLojista() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, setUser } = useAuth();
-  const userId = user?.id ?? location.state?.userId;
+  const { user } = useAuth();
+  const registrationUserId = location.state?.userId;
+  const authenticatedUserId = getProfileUserId(user);
+  const userId = authenticatedUserId ?? registrationUserId;
+  const isEditing = location.pathname === "/store/perfil/editar";
+
   const [storeName, setStoreName] = useState("");
-  const [ownerName, setOwnerName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [niche, setNiche] = useState("");
+  const [cnpj, setCnpj] = useState("");
   const [instagram, setInstagram] = useState("");
   const [website, setWebsite] = useState("");
   const [logoFile, setLogoFile] = useState(null);
 
   const [errors, setErrors] = useState({
     storeName: "",
-    ownerName: "",
     description: "",
-    category: "",
+    niche: "",
+    cnpj: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
+
+  useEffect(() => {
+    if (!userId) {
+      navigate(isEditing ? "/dashboard" : "/cadastro", { replace: true });
+      return;
+    }
+
+    if (!isEditing) return;
+
+    let active = true;
+
+    async function loadProfile() {
+      try {
+        const profile = await fetchStoreProfile(userId);
+        if (!active) return;
+
+        setStoreName(profile.storeName || "");
+        setDescription(profile.description || "");
+        setNiche(profile.niche || "");
+        setCnpj(profile.cnpj || "");
+
+        const socials = Array.isArray(profile.socialNetworks) ? profile.socialNetworks : [];
+        const instagramProfile = socials.find((item) => /instagram/i.test(item.name || item.platform || ""));
+        const siteProfile = socials.find((item) => /site|website/i.test(item.name || item.platform || ""));
+        setInstagram(instagramProfile?.url || instagramProfile?.link || "");
+        setWebsite(siteProfile?.url || siteProfile?.link || "");
+      } catch (err) {
+        if (active) {
+          setAlert({ message: err.message || "Não foi possível carregar o perfil da loja.", variant: "error" });
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, [isEditing, navigate, userId]);
 
   function clearFieldError(field) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
@@ -51,19 +98,19 @@ function PerfilLojista() {
     clearFieldError("storeName");
   }
 
-  function handleOwnerNameChange(event) {
-    setOwnerName(event.target.value);
-    clearFieldError("ownerName");
-  }
-
   function handleDescriptionChange(event) {
     setDescription(event.target.value);
     clearFieldError("description");
   }
 
-  function handleCategoryChange(event) {
-    setCategory(event.target.value);
-    clearFieldError("category");
+  function handleNicheChange(event) {
+    setNiche(event.target.value);
+    clearFieldError("niche");
+  }
+
+  function handleCnpjChange(event) {
+    setCnpj(event.target.value);
+    clearFieldError("cnpj");
   }
 
   async function handleSubmit(event) {
@@ -71,12 +118,9 @@ function PerfilLojista() {
 
     const nextErrors = {
       storeName: storeName.trim() === "" ? "Digite o nome da sua loja." : "",
-      ownerName: ownerName.trim() === "" ? "Digite o nome do responsável." : "",
-      description:
-        description.trim() === ""
-          ? "Escreva uma breve descrição da sua loja."
-          : "",
-      category: category === "" ? "Selecione uma categoria." : "",
+      description: description.trim() === "" ? "Escreva uma breve descrição da sua loja." : "",
+      niche: niche === "" ? "Selecione um nicho." : "",
+      cnpj: cnpj.trim() === "" ? "Informe o CNPJ." : "",
     };
 
     setErrors(nextErrors);
@@ -87,43 +131,57 @@ function PerfilLojista() {
       return;
     }
 
+    const socialNetworks = [];
+    if (instagram.trim()) socialNetworks.push({ name: "Instagram", url: instagram.trim() });
+    if (website.trim()) socialNetworks.push({ name: "Site", url: website.trim() });
+
     try {
-      const response = await authFetch("/api/store-profiles", {
+      const profilePayload = {
+        userId,
+        storeName: storeName.trim(),
+        description: description.trim(),
+        niche,
+        cnpj: cnpj.trim(),
+        socialNetworks,
+      };
+
+      if (isEditing) {
+        await updateStoreProfile(userId, profilePayload);
+        navigate("/store/perfil", {
+          replace: true,
+          state: { profileUpdated: true },
+        });
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/store-profiles`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          storeName,
-          ownerName,
-          description,
-          category,
-          instagram,
-          website,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profilePayload),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Erro ao salvar o perfil da loja.");
+        throw new Error(errorData.message || "Erro ao criar o perfil da loja.");
       }
 
       setAlert({
-        message: "Perfil da loja salvo com sucesso no banco! Redirecionando...",
+        message: "Perfil da loja criado com sucesso! Redirecionando para o login...",
         variant: "success",
       });
 
-      setUser((prev) => ({ ...prev, tipo: "lojista" }));
-      setTimeout(() => navigate("/dashboard", { replace: true }), 900);
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 1000);
+
     } catch (err) {
-      setAlert({ message: err.message || "Erro de conexão com o servidor.", variant: "error" });
+      setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
     }
   }
 
   function handleBack(event) {
     event.preventDefault();
-    navigate("/selecionar-perfil");
+    navigate(isEditing ? "/store/perfil" : "/cadastro");
   }
 
   return (
@@ -134,10 +192,13 @@ function PerfilLojista() {
         <div className="login-card login-card--wide">
           <div className="login-card__header">
             <Logo />
-            <h2 className="login-card__title">Vamos criar o perfil da sua loja</h2>
+            <h2 className="login-card__title">
+              {isEditing ? "Editar perfil da sua loja" : "Vamos criar o perfil da sua loja"}
+            </h2>
             <p className="login-card__subtitle">
-              Conte um pouco sobre sua marca para que afiliados e criadores
-              possam conhecer seu negócio.
+              {isEditing
+                ? "Atualize os dados comerciais, a apresentação e os canais digitais da sua loja."
+                : "Conte um pouco sobre sua marca para que afiliados e criadores possam conhecer seu negócio."}
             </p>
           </div>
 
@@ -148,6 +209,8 @@ function PerfilLojista() {
               <ProfileImageUpload
                 id="storeLogo"
                 label="Nenhuma logo selecionada."
+                altText="Prévia da logo selecionada"
+                placeholderText="Adicionar logo"
                 onFileSelected={setLogoFile}
               />
 
@@ -156,7 +219,7 @@ function PerfilLojista() {
                   id="storeName"
                   label="Nome da loja"
                   autoComplete="organization"
-                  placeholder="Digite o nome da sua loja"
+                  placeholder="Como sua loja aparecerá na plataforma"
                   value={storeName}
                   onChange={handleStoreNameChange}
                   error={errors.storeName}
@@ -165,24 +228,23 @@ function PerfilLojista() {
             </div>
 
             <TextField
-              id="ownerName"
-              label="Nome do responsável"
-              autoComplete="name"
-              placeholder="Digite seu nome"
-              value={ownerName}
-              onChange={handleOwnerNameChange}
-              error={errors.ownerName}
+              id="cnpj"
+              label="CNPJ"
+              placeholder="00.000.000/0000-00"
+              value={cnpj}
+              onChange={handleCnpjChange}
+              error={errors.cnpj}
             />
 
             <SelectField
-              id="category"
-              label="Categoria da loja"
-              value={category}
-              onChange={handleCategoryChange}
-              error={errors.category}
-              placeholder="Selecione uma categoria"
+              id="niche"
+              label="Nicho da loja"
+              value={niche}
+              onChange={handleNicheChange}
+              error={errors.niche}
+              placeholder="Selecione um nicho"
             >
-              {CATEGORIES.map((option) => (
+              {NICHES.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -222,7 +284,7 @@ function PerfilLojista() {
               </a>
 
               <button type="submit" className="btn-primary">
-                Continuar →
+                {isEditing ? "Salvar perfil" : "Continuar →"}
               </button>
             </div>
           </form>

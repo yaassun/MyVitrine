@@ -10,22 +10,25 @@ const STATS = [
 
 const PEDIDOS = [];
 
-function DashboardComprador() {
+function DashboardAfiliado() {
   const { user } = useAuth();
-  const nome = user?.nome || "Comprador";
+  const nome = user?.nome || "Afiliado";
 
   return (
     <div className="dashboard">
       <div className="dashboard__inner">
         <header className="dashboard__header">
           <div>
-            <p className="dashboard__eyebrow">Área do comprador</p>
+            <p className="dashboard__eyebrow">Área do Afiliador</p>
             <h1 className="dashboard__title">Olá, {nome}</h1>
             <p className="dashboard__subtitle">
               Acompanhe seus pedidos e descubra novas lojas por aqui.
             </p>
           </div>
-          <Button to="/lojistas">Explorar lojas</Button>
+          <div className="dashboard__actions">
+            <Button to="/lojistas">Explorar lojas</Button>
+            <Button to="/affiliate/perfil" variant="secondary">Meu perfil</Button>
+          </div>
         </header>
 
         <section className="dashboard__grid">
@@ -62,4 +65,4 @@ function DashboardComprador() {
   );
 }
 
-export default DashboardComprador;
+export default DashboardAfiliado;

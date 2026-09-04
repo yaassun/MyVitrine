@@ -7,6 +7,13 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
+import { API_URL } from "../auth/authClient.js";
+import {
+  fetchAffiliateProfile,
+  getProfileUserId,
+  updateAffiliateProfile,
+} from "../services/profileService.js";
 
 // Categorias de produtos que o afiliado costuma divulgar. Mantidas
 // alinhadas às categorias de loja para facilitar o cruzamento entre
@@ -25,13 +32,18 @@ const CATEGORIES = [
 function PerfilAfiliado() {
   const navigate = useNavigate();
   const location = useLocation();
-  const userId = location.state?.userId;
+  const { user } = useAuth();
+  const registrationUserId = location.state?.userId;
+  const authenticatedUserId = getProfileUserId(user);
+  const userId = authenticatedUserId ?? registrationUserId;
+  const isEditing = location.pathname === "/affiliate/perfil/editar";
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [category, setCategory] = useState("");
   const [instagram, setInstagram] = useState("");
   const [website, setWebsite] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState(null);
 
   const [errors, setErrors] = useState({
     displayName: "",
@@ -40,11 +52,44 @@ function PerfilAfiliado() {
     category: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
+
   useEffect(() => {
     if (!userId) {
-      navigate("/cadastro", { replace: true });
+      navigate(isEditing ? "/dashboard" : "/cadastro", { replace: true });
+      return;
     }
-  }, [userId, navigate]);
+
+    if (!isEditing) return;
+
+    let active = true;
+
+    async function loadProfile() {
+      try {
+        const profile = await fetchAffiliateProfile(userId);
+        if (!active) return;
+
+        setDisplayName(user?.name || user?.fullName || "");
+        setBio(profile.bio || "");
+        setCategory(profile.niche || "");
+        setProfilePhotoUrl(profile.profilePhotoUrl || null);
+
+        const socials = Array.isArray(profile.socialNetworks) ? profile.socialNetworks : [];
+        const instagramProfile = socials.find((item) => /instagram/i.test(item.name || item.platform || ""));
+        const siteProfile = socials.find((item) => /site|website|canal/i.test(item.name || item.platform || ""));
+        setInstagram(instagramProfile?.url || instagramProfile?.link || "");
+        setWebsite(siteProfile?.url || siteProfile?.link || "");
+      } catch (err) {
+        if (active) {
+          setAlert({ message: err.message || "Não foi possível carregar o perfil de afiliado.", variant: "error" });
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, [isEditing, navigate, user, userId]);
 
   function clearFieldError(field) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
@@ -83,7 +128,27 @@ function PerfilAfiliado() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/affiliate-profiles", {
+      if (isEditing) {
+        const socialNetworks = [];
+        if (instagram.trim()) socialNetworks.push({ name: "Instagram", url: instagram.trim() });
+        if (website.trim()) socialNetworks.push({ name: "Canal de divulgação", url: website.trim() });
+
+        await updateAffiliateProfile(userId, {
+          userId,
+          bio: bio.trim(),
+          niche: category,
+          socialNetworks,
+          profilePhotoUrl,
+        });
+
+        navigate("/affiliate/perfil", {
+          replace: true,
+          state: { profileUpdated: true },
+        });
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/affiliate-profiles`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,7 +184,7 @@ function PerfilAfiliado() {
 
   function handleBack(event) {
     event.preventDefault();
-    navigate("/selecionar-perfil");
+    navigate(isEditing ? "/affiliate/perfil" : "/selecionar-perfil");
   }
 
   return (
@@ -130,10 +195,13 @@ function PerfilAfiliado() {
         <div className="login-card login-card--wide">
           <div className="login-card__header">
             <Logo />
-            <h2 className="login-card__title">Vamos criar seu perfil de afiliado</h2>
+            <h2 className="login-card__title">
+              {isEditing ? "Editar seu perfil de afiliado" : "Vamos criar seu perfil de afiliado"}
+            </h2>
             <p className="login-card__subtitle">
-              Conte um pouco sobre você para que lojistas conheçam seu
-              trabalho de divulgação.
+              {isEditing
+                ? "Atualize sua área de atuação, sua apresentação e os canais onde divulga produtos."
+                : "Conte um pouco sobre você para que lojistas conheçam seu trabalho de divulgação."}
             </p>
           </div>
 
@@ -209,7 +277,7 @@ function PerfilAfiliado() {
               </a>
 
               <button type="submit" className="btn-primary">
-                Continuar →
+                {isEditing ? "Salvar perfil" : "Continuar →"}
               </button>
             </div>
           </form>
