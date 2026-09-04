@@ -14,9 +14,10 @@ import PerfilCriador from "./pages/PerfilCriador.jsx";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 import DashboardCriador from "./pages/DashboardCriador.jsx";
 import DashboardLojista from "./pages/DashboardLojista.jsx";
-import DashboardComprador from "./pages/DashboardComprador.jsx";
+import DashboardAfiliado from "./pages/DashboardAfiliado.jsx";
 import MeusTrabalhos from "./pages/MeusTrabalhos.jsx";
 import DetalheTrabalhoCriador from "./pages/DetalheTrabalhoCriador.jsx";
+import PerfilCriadorView from "./pages/PerfilCriadorView.jsx";
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -30,7 +31,7 @@ function DashboardRouter() {
   const { user } = useAuth();
   if (user?.profileType === "CREATOR") return <DashboardCriador />;
   if (user?.profileType === "STORE") return <DashboardLojista />;
-  if (user?.profileType === "AFFILIATE") return <DashboardComprador />;
+  if (user?.profileType === "AFFILIATE") return <DashboardAfiliado />;
   return <DashboardPlaceholder />;
 }
 
@@ -53,8 +54,9 @@ function App() {
             <Route path="/dashboard" element={<DashboardRouter />} />
             <Route path="/dashboard/creator" element={<DashboardCriador />} />
             <Route path="/dashboard/store" element={<DashboardLojista />} />
-            <Route path="/dashboard/affiliate" element={<DashboardComprador />} />
-            <Route path="/creator/perfil" element={<PerfilCriador />} />
+            <Route path="/dashboard/affiliate" element={<DashboardAfiliado />} />
+            <Route path="/creator/perfil" element={<PerfilCriadorView />} />
+            <Route path="/creator/perfil/editar" element={<PerfilCriador />} />
             <Route path="/creator/trabalhos" element={<MeusTrabalhos />} />
             <Route path="/creator/trabalhos/:id" element={<DetalheTrabalhoCriador />} />
           </Route>

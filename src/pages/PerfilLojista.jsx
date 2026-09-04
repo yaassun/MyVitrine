@@ -93,7 +93,7 @@ function PerfilLojista() {
     if (website.trim()) socialNetworks.push({ name: "Site", url: website.trim() });
 
     try {
-      const response = await fetch("http://localhost:8080/api/creator-profiles", {
+      const response = await fetch("http://localhost:8080/api/store-profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
