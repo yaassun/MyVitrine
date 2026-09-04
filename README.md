@@ -161,11 +161,11 @@ O projeto utiliza componentes funcionais do React. As páginas consomem a API po
 
 | Integrante | Papel |
 |---|---|
-| Natália | Product Owner / PM |
-| Victor | Desenvolvedor Backend |
-| Yasmin | Desenvolvedora Frontend |
-| Kayky | Desenvolvimento |
-| Késia | Desenvolvimento |
+| Natália Cunha | Product Owner / PM |
+| Victor Augusto | Tech Lead / Desenvolvimento Backend |
+| Yasmin Assunção | Desenvolvimento Frontend |
+| Kayky Bittencourt| Desenvolvimento |
+| Késia de Jesus | Desenvolvimento |
 
 ## Sobre o projeto
 
