@@ -7,6 +7,12 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
+import {
+  fetchStoreProfile,
+  getProfileUserId,
+  updateStoreProfile,
+} from "../services/profileService.js";
 
 const NICHES = [
   "Moda",
@@ -22,13 +28,11 @@ const NICHES = [
 function PerfilLojista() {
   const navigate = useNavigate();
   const location = useLocation();
-  const userId = location.state?.userId;
-
-  useEffect(() => {
-    if (!userId) {
-      navigate("/cadastro", { replace: true });
-    }
-  }, [userId, navigate]);
+  const { user } = useAuth();
+  const registrationUserId = location.state?.userId;
+  const authenticatedUserId = getProfileUserId(user);
+  const userId = authenticatedUserId ?? registrationUserId;
+  const isEditing = location.pathname === "/store/perfil/editar";
 
   const [storeName, setStoreName] = useState("");
   const [description, setDescription] = useState("");
@@ -45,6 +49,44 @@ function PerfilLojista() {
     cnpj: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
+
+  useEffect(() => {
+    if (!userId) {
+      navigate(isEditing ? "/dashboard" : "/cadastro", { replace: true });
+      return;
+    }
+
+    if (!isEditing) return;
+
+    let active = true;
+
+    async function loadProfile() {
+      try {
+        const profile = await fetchStoreProfile(userId);
+        if (!active) return;
+
+        setStoreName(profile.storeName || "");
+        setDescription(profile.description || "");
+        setNiche(profile.niche || "");
+        setCnpj(profile.cnpj || "");
+
+        const socials = Array.isArray(profile.socialNetworks) ? profile.socialNetworks : [];
+        const instagramProfile = socials.find((item) => /instagram/i.test(item.name || item.platform || ""));
+        const siteProfile = socials.find((item) => /site|website/i.test(item.name || item.platform || ""));
+        setInstagram(instagramProfile?.url || instagramProfile?.link || "");
+        setWebsite(siteProfile?.url || siteProfile?.link || "");
+      } catch (err) {
+        if (active) {
+          setAlert({ message: err.message || "Não foi possível carregar o perfil da loja.", variant: "error" });
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, [isEditing, navigate, userId]);
 
   function clearFieldError(field) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
@@ -93,17 +135,28 @@ function PerfilLojista() {
     if (website.trim()) socialNetworks.push({ name: "Site", url: website.trim() });
 
     try {
+      const profilePayload = {
+        userId,
+        storeName: storeName.trim(),
+        description: description.trim(),
+        niche,
+        cnpj: cnpj.trim(),
+        socialNetworks,
+      };
+
+      if (isEditing) {
+        await updateStoreProfile(userId, profilePayload);
+        navigate("/store/perfil", {
+          replace: true,
+          state: { profileUpdated: true },
+        });
+        return;
+      }
+
       const response = await fetch("http://localhost:8080/api/store-profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: userId,
-          storeName: storeName.trim(),
-          description: description.trim(),
-          niche: niche,
-          cnpj: cnpj.trim(),
-          socialNetworks: socialNetworks,
-        }),
+        body: JSON.stringify(profilePayload),
       });
 
       if (!response.ok) {
@@ -127,7 +180,7 @@ function PerfilLojista() {
 
   function handleBack(event) {
     event.preventDefault();
-    navigate("/cadastro");
+    navigate(isEditing ? "/store/perfil" : "/cadastro");
   }
 
   return (
@@ -138,10 +191,13 @@ function PerfilLojista() {
         <div className="login-card login-card--wide">
           <div className="login-card__header">
             <Logo />
-            <h2 className="login-card__title">Vamos criar o perfil da sua loja</h2>
+            <h2 className="login-card__title">
+              {isEditing ? "Editar perfil da sua loja" : "Vamos criar o perfil da sua loja"}
+            </h2>
             <p className="login-card__subtitle">
-              Conte um pouco sobre sua marca para que afiliados e criadores
-              possam conhecer seu negócio.
+              {isEditing
+                ? "Atualize os dados comerciais, a apresentação e os canais digitais da sua loja."
+                : "Conte um pouco sobre sua marca para que afiliados e criadores possam conhecer seu negócio."}
             </p>
           </div>
 
@@ -227,7 +283,7 @@ function PerfilLojista() {
               </a>
 
               <button type="submit" className="btn-primary">
-                Continuar →
+                {isEditing ? "Salvar perfil" : "Continuar →"}
               </button>
             </div>
           </form>

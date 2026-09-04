@@ -25,7 +25,10 @@ function DashboardAfiliado() {
               Acompanhe seus pedidos e descubra novas lojas por aqui.
             </p>
           </div>
-          <Button to="/lojistas">Explorar lojas</Button>
+          <div className="dashboard__actions">
+            <Button to="/lojistas">Explorar lojas</Button>
+            <Button to="/affiliate/perfil" variant="secondary">Meu perfil</Button>
+          </div>
         </header>
 
         <section className="dashboard__grid">

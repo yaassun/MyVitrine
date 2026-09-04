@@ -25,7 +25,10 @@ function DashboardLojista() {
               Gerencie sua loja, criadores e afiliados por aqui.
             </p>
           </div>
-          <Button to="/criadores">Buscar criadores</Button>
+          <div className="dashboard__actions">
+            <Button to="/criadores">Buscar criadores</Button>
+            <Button to="/store/perfil" variant="secondary">Meu perfil</Button>
+          </div>
         </header>
 
         <section className="dashboard__grid">
