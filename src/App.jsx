@@ -22,6 +22,9 @@ import PerfilCriadorView from "./pages/PerfilCriadorView.jsx";
 import PerfilLojistaView from "./pages/PerfilLojistaView.jsx";
 import PerfilAfiliadoView from "./pages/PerfilAfiliadoView.jsx";
 
+// 1. Importe a nova tela de cadastro de produto aqui
+import CadastroProduto from "./pages/CadastroProduto.jsx";
+
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -54,10 +57,15 @@ function App() {
           <Route path="/perfil-afiliado" element={<PerfilAfiliado />} />
           <Route path="/perfil-criador" element={<PerfilCriador />} />
 
+          {/* O ProtectedRoute atua como um "guarda" para todas as rotas abaixo dele */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardRouter />} />
             <Route path="/dashboard/creator" element={<DashboardCriador />} />
             <Route path="/dashboard/store" element={<DashboardLojista />} />
+            
+            {/* 2. Adicione a nova rota protegida aqui! */}
+            <Route path="/store/produtos/novo" element={<CadastroProduto />} />
+            
             <Route path="/dashboard/affiliate" element={<DashboardAfiliado />} />
             <Route path="/creator/perfil" element={<PerfilCriadorView />} />
             <Route path="/creator/perfil/editar" element={<PerfilCriador />} />
