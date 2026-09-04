@@ -7,10 +7,10 @@ import ProfileImageUpload from "../components/ProfileImageUpload.jsx";
 import SelectField from "../components/SelectField.jsx";
 import TextareaField from "../components/TextareaField.jsx";
 import TextField from "../components/TextField.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
+import { authFetch } from "../auth/authClient.js";
+import { getUserIdentifier, upsertCreatorProfile } from "../services/creatorService.js";
 
-
-// Mesmas categorias usadas por lojistas e afiliados, para permitir
-// cruzar criadores de conteúdo com marcas e produtos do mesmo nicho.
 const CATEGORIES = [
   "Moda",
   "Beleza",
@@ -25,12 +25,10 @@ const CATEGORIES = [
 function PerfilCriador() {
   const navigate = useNavigate();
   const location = useLocation();
-  const userId = location.state?.userId;
-  useEffect(() => {
-    if (!userId) {
-      navigate("/cadastro", { replace: true });
-    }
-  }, [userId, navigate]);
+  const { user, setUser } = useAuth();
+  const registrationUserId = location.state?.userId;
+  const currentUserId = getUserIdentifier(user) ?? registrationUserId;
+
   const [creatorName, setCreatorName] = useState("");
   const [bio, setBio] = useState("");
   const [category, setCategory] = useState("");
@@ -38,6 +36,7 @@ function PerfilCriador() {
   const [tiktok, setTiktok] = useState("");
   const [site, setSite] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [errors, setErrors] = useState({
     creatorName: "",
@@ -45,6 +44,43 @@ function PerfilCriador() {
     category: "",
   });
   const [alert, setAlert] = useState({ message: "", variant: "error" });
+
+  useEffect(() => {
+    if (!currentUserId && !registrationUserId) {
+      navigate("/cadastro", { replace: true });
+      return;
+    }
+
+    const loadProfile = async () => {
+      if (!currentUserId) return;
+
+      try {
+        const response = await authFetch(`/api/creator-profiles/${currentUserId}`);
+        if (!response.ok) return;
+
+        const profile = await response.json();
+        if (!profile) return;
+
+        setIsEditing(true);
+        setCreatorName(profile.creatorName || profile.name || "");
+        setBio(profile.bio || "");
+        setCategory(profile.niche || profile.category || "");
+
+        const socials = profile.socialNetworks || [];
+        const instagramProfile = socials.find((item) => /instagram/i.test(item.name || item.platform || ""));
+        const tiktokProfile = socials.find((item) => /tiktok/i.test(item.name || item.platform || ""));
+        const siteProfile = socials.find((item) => /site|youtube|portfolio/i.test(item.name || item.platform || ""));
+
+        setInstagram(instagramProfile?.url || instagramProfile?.link || "");
+        setTiktok(tiktokProfile?.url || tiktokProfile?.link || "");
+        setSite(siteProfile?.url || siteProfile?.link || "");
+      } catch (err) {
+        console.warn("Perfil de criador ainda não foi criado.", err);
+      }
+    };
+
+    loadProfile();
+  }, [currentUserId, registrationUserId, navigate]);
 
   function clearFieldError(field) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
@@ -68,13 +104,14 @@ function PerfilCriador() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    if (!currentUserId) {
+      setAlert({ message: "Usuário autenticado não encontrado.", variant: "error" });
+      return;
+    }
+
     const nextErrors = {
-      creatorName:
-        creatorName.trim() === "" ? "Digite seu nome de criador." : "",
-      bio:
-        bio.trim() === ""
-          ? "Conte um pouco sobre você e seu conteúdo."
-          : "",
+      creatorName: creatorName.trim() === "" ? "Digite seu nome de criador." : "",
+      bio: bio.trim() === "" ? "Conte um pouco sobre você e seu conteúdo." : "",
       category: category === "" ? "Selecione uma categoria." : "",
     };
 
@@ -85,39 +122,33 @@ function PerfilCriador() {
       setAlert({ message: "Verifique os campos destacados abaixo.", variant: "error" });
       return;
     }
+
     const socialNetworks = [];
-     if (instagram.trim()) socialNetworks.push({ name: "Instagram", url: instagram.trim() });
-     if (tiktok.trim()) socialNetworks.push({ name: "TikTok", url: tiktok.trim() });
-     if (site.trim()) socialNetworks.push({ name: "Site", url: site.trim() });
+    if (instagram.trim()) socialNetworks.push({ name: "Instagram", url: instagram.trim() });
+    if (tiktok.trim()) socialNetworks.push({ name: "TikTok", url: tiktok.trim() });
+    if (site.trim()) socialNetworks.push({ name: "Site", url: site.trim() });
 
-       try {
-      const response = await fetch("http://localhost:8080/api/creator-profiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: userId,
-          creatorName: creatorName.trim(),
-          bio: bio.trim(),
-          niche: category, 
-          socialNetworks: socialNetworks,
-          profilePhotoUrl: null 
-        }),
-      });
+    try {
+      const profilePayload = {
+        userId: currentUserId,
+        creatorName: creatorName.trim(),
+        bio: bio.trim(),
+        niche: category,
+        socialNetworks,
+        profilePhotoUrl: null,
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Erro ao criar o perfil de criador.");
-      }
+      await upsertCreatorProfile(currentUserId, profilePayload);
 
+      setUser((prev) => ({ ...prev, profileType: "CREATOR", creatorName: creatorName.trim() }));
       setAlert({
-        message: " Redirecionando para o login...",
+        message: isEditing ? "Perfil atualizado com sucesso." : "Perfil criado com sucesso!",
         variant: "success",
       });
 
-      setTimeout(() => {
-        navigate("/login", { replace: true });
-      }, 1000);
-
+      if (!isEditing) {
+        setTimeout(() => navigate("/dashboard", { replace: true }), 900);
+      }
     } catch (err) {
       setAlert({ message: err.message || "Erro ao conectar com o servidor.", variant: "error" });
     }
@@ -125,8 +156,9 @@ function PerfilCriador() {
 
   function handleBack(event) {
     event.preventDefault();
-    navigate("/cadastro");
+    navigate(isEditing ? "/dashboard" : "/cadastro");
   }
+
   return (
     <div className="page">
       <BrandPanel />
@@ -135,10 +167,11 @@ function PerfilCriador() {
         <div className="login-card login-card--wide">
           <div className="login-card__header">
             <Logo />
-            <h2 className="login-card__title">Vamos criar seu perfil de criador de conteúdo</h2>
+            <h2 className="login-card__title">{isEditing ? "Editar seu perfil de criador" : "Vamos criar seu perfil de criador de conteúdo"}</h2>
             <p className="login-card__subtitle">
-              Conte um pouco sobre você para que marcas e lojistas conheçam
-              seu conteúdo e seu estilo.
+              {isEditing
+                ? "Atualize suas informações profissionais e redes sociais para manter seu perfil alinhado com o backend."
+                : "Conte um pouco sobre você para que marcas e lojistas conheçam seu conteúdo e seu estilo."}
             </p>
           </div>
 
@@ -166,6 +199,7 @@ function PerfilCriador() {
                 />
               </div>
             </div>
+
             <SelectField
               id="category"
               label="Categoria de conteúdo"
@@ -222,7 +256,7 @@ function PerfilCriador() {
               </a>
 
               <button type="submit" className="btn-primary">
-                Continuar →
+                {isEditing ? "Salvar perfil" : "Continuar →"}
               </button>
             </div>
           </form>
