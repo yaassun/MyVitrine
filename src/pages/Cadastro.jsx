@@ -6,7 +6,7 @@ import Logo from "../components/Logo.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import TextField from "../components/TextField.jsx";
 import SelectField from "../components/SelectField.jsx";
-
+import { API_URL } from "../auth/authClient.js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -106,7 +106,7 @@ function Cadastro() {
     }
 
   try {
-      const response = await fetch("http://localhost:8080/api/users", {
+      const response = await fetch(`${API_URL}/api/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
