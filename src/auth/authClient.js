@@ -1,7 +1,7 @@
 import { getAccessToken, setAccessToken, clearAccessToken } from "./tokenStore.js";
 
 // Ajuste para a URL real do seu backend na porta 8080
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 /**
  * Tenta renovar a sessão do usuário chamando /api/v1/auth/refresh.
