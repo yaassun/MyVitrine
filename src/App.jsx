@@ -7,6 +7,7 @@ import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
 import RecuperarSenha from "./pages/RecuperarSenha.jsx";
 import RedefinirSenha from "./pages/RedefinirSenha.jsx";
+import ConcluirCadastro from "./pages/ConcluirCadastro.jsx";
 import SelecaoPerfil from "./pages/SelecaoPerfil.jsx";
 import PerfilLojista from "./pages/PerfilLojista.jsx";
 import PerfilAfiliado from "./pages/PerfilAfiliado.jsx";
@@ -47,6 +48,7 @@ function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="/concluir-cadastro" element={<ConcluirCadastro />} />
           <Route path="/selecionar-perfil" element={<SelecaoPerfil />} />
           <Route path="/perfil-lojista" element={<PerfilLojista />} />
           <Route path="/perfil-afiliado" element={<PerfilAfiliado />} />

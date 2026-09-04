@@ -81,6 +81,11 @@ function Login() {
 
       setTimeout(() => navigate(redirectTo, { replace: true }), 600);
     } catch (err) {
+      if (err.code === "INCOMPLETE_REGISTRATION") {
+        navigate("/concluir-cadastro", { state: { email: trimmedEmail } });
+        return;
+      }
+
       setAlert({ message: err.message || "E-mail ou senha inválidos.", variant: "error" });
     }
   }
