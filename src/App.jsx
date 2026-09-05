@@ -29,9 +29,6 @@ import "./creatorDirectory.css";
 // 1. Importe a nova tela de cadastro de produto aqui
 import CadastroProduto from "./pages/CadastroProduto.jsx";
 
-// 1. Importe a nova tela de cadastro de produto aqui
-import CadastroProduto from "./pages/CadastroProduto.jsx";
-
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
 
