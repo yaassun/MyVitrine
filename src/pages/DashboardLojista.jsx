@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { listarProdutosDaLoja } from "../auth/ProdutoClient.js";
 import Button from "../components/Button.jsx";
 import { formatProductMoney, getStoreDashboard } from "../services/productService.js";
 
@@ -45,7 +46,7 @@ function DashboardLojista() {
             <p className="dashboard__eyebrow">Área do lojista</p>
             <h1 className="dashboard__title">Olá, {nome}</h1>
             <p className="dashboard__subtitle">
-              Gerencie sua loja, criadores e afiliados por aqui.
+              Gerencie os produtos e encontre criadores para divulgar sua marca.
             </p>
           </div>
           <div className="dashboard__actions">
@@ -66,12 +67,25 @@ function DashboardLojista() {
           ))}
         </section>
 
+        <section className="dashboard-section commerce-section">
+          <div className="dashboard-section__header commerce-section__header">
+            <div>
+              <p className="dashboard__eyebrow">Catálogo da loja</p>
+              <h2 className="dashboard-section__title">Meus produtos</h2>
+            </div>
+            <Button to="/store/produtos/novo" variant="secondary">Adicionar produto</Button>
+          </div>
+
+          <p className="dashboard-empty">Acompanhe aqui o desempenho dos seus produtos e contratações.</p>
+        </section>
+
         <section className="dashboard-section">
           <div className="dashboard-section__header">
             <h2 className="dashboard-section__title">Atividade recente</h2>
           </div>
-
-          <p className="dashboard-empty">Acompanhe aqui o desempenho dos seus produtos e contratações.</p>
+          <p className="dashboard-empty">
+            As próximas vendas, parcerias e contratações da loja aparecerão aqui.
+          </p>
         </section>
       </div>
     </div>

@@ -33,7 +33,17 @@ import ProdutosLojista from "./pages/ProdutosLojista.jsx";
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="page-placeholder">
+        <div className="page-placeholder__card">
+          <p className="page-placeholder__eyebrow">MyVitrine</p>
+          <h1>Carregando a plataforma...</h1>
+          <p>O primeiro acesso pode levar alguns segundos.</p>
+        </div>
+      </div>
+    );
+  }
 
   return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
 }
