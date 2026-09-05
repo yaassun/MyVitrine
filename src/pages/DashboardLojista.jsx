@@ -66,6 +66,18 @@ function DashboardLojista() {
           ))}
         </section>
 
+        <section className="dashboard-section commerce-section">
+          <div className="dashboard-section__header commerce-section__header">
+            <div>
+              <p className="dashboard__eyebrow">Catálogo da loja</p>
+              <h2 className="dashboard-section__title">Meus produtos</h2>
+            </div>
+            <Button to="/store/produtos/novo" variant="secondary">Adicionar produto</Button>
+          </div>
+
+          <p className="dashboard-empty">Acompanhe aqui o desempenho dos seus produtos e contratações.</p>
+        </section>
+
         <section className="dashboard-section">
           <div className="dashboard-section__header">
             <h2 className="dashboard-section__title">Atividade recente</h2>
