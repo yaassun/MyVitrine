@@ -25,6 +25,7 @@ import PerfilAfiliadoView from "./pages/PerfilAfiliadoView.jsx";
 import Criadores from "./pages/Criadores.jsx";
 import PerfilCriadorPublico from "./pages/PerfilCriadorPublico.jsx";
 import "./creatorDirectory.css";
+import "./commerceDashboard.css";
 
 // 1. Importe a nova tela de cadastro de produto aqui
 import CadastroProduto from "./pages/CadastroProduto.jsx";
