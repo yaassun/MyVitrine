@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
 import Navbar from "./components/Navbar.jsx";
+import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
 import RecuperarSenha from "./pages/RecuperarSenha.jsx";
@@ -27,7 +28,7 @@ function RootRedirect() {
 
   if (isLoading) return null;
 
-  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+  return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
 }
 
 function DashboardRouter() {
@@ -55,6 +56,7 @@ function App() {
           <Route path="/perfil-criador" element={<PerfilCriador />} />
 
           <Route element={<ProtectedRoute />}>
+            <Route path="/home" element={<Home />} />
             <Route path="/dashboard" element={<DashboardRouter />} />
             <Route path="/dashboard/creator" element={<DashboardCriador />} />
             <Route path="/dashboard/store" element={<DashboardLojista />} />
