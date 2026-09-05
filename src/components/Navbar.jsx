@@ -53,9 +53,11 @@ function Navbar() {
       <nav className="navbar__nav" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
         {renderMenuLinks()}
         
+      {isAuthenticated && location.pathname !== "/" && (
         <Button onClick={handleLogout}>
           Sair
         </Button>
+      )}
       </nav>
 
     </header>

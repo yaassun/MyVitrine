@@ -7,7 +7,6 @@ function TextField({
   value,
   onChange,
   error,
-  ...inputProps
 }) {
   const errorId = `${id}-error`;
 
@@ -15,7 +14,6 @@ function TextField({
     <div className="field">
       <label htmlFor={id}>{label}</label>
       <input
-        {...inputProps}
         type={type}
         id={id}
         name={id}
