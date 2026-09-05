@@ -26,6 +26,7 @@ function DashboardLojista() {
             </p>
           </div>
           <div className="dashboard__actions">
+            <Button to="/store/produtos/novo" variant="primary">Cadastrar Produto</Button>
             <Button to="/criadores">Buscar criadores</Button>
             <Button to="/store/perfil" variant="secondary">Meu perfil</Button>
           </div>
