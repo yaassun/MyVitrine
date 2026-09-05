@@ -28,6 +28,7 @@ import "./creatorDirectory.css";
 
 // 1. Importe a nova tela de cadastro de produto aqui
 import CadastroProduto from "./pages/CadastroProduto.jsx";
+import ProdutosLojista from "./pages/ProdutosLojista.jsx";
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -70,6 +71,7 @@ function App() {
             
             {/* 2. Adicione a nova rota protegida aqui! */}
             <Route path="/store/produtos/novo" element={<CadastroProduto />} />
+            <Route path="/store/produtos" element={<ProdutosLojista />} />
             
             <Route path="/dashboard/affiliate" element={<DashboardAfiliado />} />
             <Route path="/criadores" element={<Criadores />} />
