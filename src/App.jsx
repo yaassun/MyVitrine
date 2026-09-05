@@ -25,15 +25,25 @@ import PerfilAfiliadoView from "./pages/PerfilAfiliadoView.jsx";
 import Criadores from "./pages/Criadores.jsx";
 import PerfilCriadorPublico from "./pages/PerfilCriadorPublico.jsx";
 import "./creatorDirectory.css";
-import "./commerceDashboard.css";
 
 // 1. Importe a nova tela de cadastro de produto aqui
 import CadastroProduto from "./pages/CadastroProduto.jsx";
+import ProdutosLojista from "./pages/ProdutosLojista.jsx";
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="page-placeholder">
+        <div className="page-placeholder__card">
+          <p className="page-placeholder__eyebrow">MyVitrine</p>
+          <h1>Carregando a plataforma...</h1>
+          <p>O primeiro acesso pode levar alguns segundos.</p>
+        </div>
+      </div>
+    );
+  }
 
   return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
 }
@@ -71,6 +81,7 @@ function App() {
             
             {/* 2. Adicione a nova rota protegida aqui! */}
             <Route path="/store/produtos/novo" element={<CadastroProduto />} />
+            <Route path="/store/produtos" element={<ProdutosLojista />} />
             
             <Route path="/dashboard/affiliate" element={<DashboardAfiliado />} />
             <Route path="/criadores" element={<Criadores />} />
