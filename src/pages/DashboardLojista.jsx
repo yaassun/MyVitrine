@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { listarProdutosDaLoja } from "../auth/ProdutoClient.js";
 import Button from "../components/Button.jsx";
 import { formatProductMoney, getStoreDashboard } from "../services/productService.js";
 
@@ -46,7 +45,7 @@ function DashboardLojista() {
             <p className="dashboard__eyebrow">Área do lojista</p>
             <h1 className="dashboard__title">Olá, {nome}</h1>
             <p className="dashboard__subtitle">
-              Gerencie os produtos e encontre criadores para divulgar sua marca.
+              Gerencie sua loja, criadores e afiliados por aqui.
             </p>
           </div>
           <div className="dashboard__actions">
@@ -83,9 +82,8 @@ function DashboardLojista() {
           <div className="dashboard-section__header">
             <h2 className="dashboard-section__title">Atividade recente</h2>
           </div>
-          <p className="dashboard-empty">
-            As próximas vendas, parcerias e contratações da loja aparecerão aqui.
-          </p>
+
+          <p className="dashboard-empty">Acompanhe aqui o desempenho dos seus produtos e contratações.</p>
         </section>
       </div>
     </div>

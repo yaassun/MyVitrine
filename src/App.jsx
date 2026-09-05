@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {BrowserRouter, Routes, Route, Navigate, Link,} from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
@@ -39,7 +39,46 @@ function RootRedirect() {
         <div className="page-placeholder__card">
           <p className="page-placeholder__eyebrow">MyVitrine</p>
           <h1>Carregando a plataforma...</h1>
-          <p>O primeiro acesso pode levar alguns segundos.</p>
+          <p>
+            O primeiro acesso pode levar alguns segundos enquanto o servidor inicia.
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginTop: "20px",
+            }}
+          >
+          <Link
+            to="/login"
+            className="btn-primary"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textDecoration: "none",
+            }}
+          >
+            Ir para o login
+          </Link>
+
+          <Link
+            to="/cadastro"
+            className="btn-primary"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textDecoration: "none",
+            }}
+          >
+            Criar conta
+          </Link>
+
+          </div>
         </div>
       </div>
     );
