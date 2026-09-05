@@ -16,6 +16,7 @@ import DashboardPlaceholder from "./pages/DashboardPlaceholder.jsx";
 import DashboardCriador from "./pages/DashboardCriador.jsx";
 import DashboardLojista from "./pages/DashboardLojista.jsx";
 import DashboardComprador from "./pages/DashboardComprador.jsx";
+import ProdutosLojista from "./pages/ProdutosLojista.jsx";
 import MeusTrabalhos from "./pages/MeusTrabalhos.jsx";
 import DetalheTrabalhoCriador from "./pages/DetalheTrabalhoCriador.jsx";
 
@@ -55,6 +56,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardRouter />} />
             <Route path="/dashboard/creator" element={<DashboardCriador />} />
             <Route path="/dashboard/store" element={<DashboardLojista />} />
+            <Route path="/store/produtos" element={<ProdutosLojista />} />
             <Route path="/dashboard/affiliate" element={<DashboardComprador />} />
             <Route path="/creator/perfil" element={<PerfilCriador />} />
             <Route path="/creator/trabalhos" element={<MeusTrabalhos />} />

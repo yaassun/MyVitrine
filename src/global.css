@@ -1015,6 +1015,37 @@ textarea {
   font-weight: 600;
 }
 
+.dashboard-feedback {
+  background: #e8f5ed;
+  color: #23613b;
+  border: 1px solid #b9dec5;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.product-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.product-table-wrap { overflow-x: auto; }
+.product-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.product-table th, .product-table td { padding: 14px 10px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.product-table th { color: var(--text-secondary); font-size: 12px; text-transform: uppercase; }
+.product-table__name { display: flex; align-items: center; gap: 10px; min-width: 180px; white-space: normal; }
+.product-table__name img { width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-sm); }
+.product-table__actions { display: flex; gap: 6px; }
+.product-pagination { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 20px; font-size: 14px; }
+
+@media (max-width: 700px) {
+  .product-form { grid-template-columns: 1fr; }
+  .product-table__actions { flex-direction: column; }
+}
+
 .proposal-groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
