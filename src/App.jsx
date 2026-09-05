@@ -22,6 +22,9 @@ import DetalheTrabalhoCriador from "./pages/DetalheTrabalhoCriador.jsx";
 import PerfilCriadorView from "./pages/PerfilCriadorView.jsx";
 import PerfilLojistaView from "./pages/PerfilLojistaView.jsx";
 import PerfilAfiliadoView from "./pages/PerfilAfiliadoView.jsx";
+import Criadores from "./pages/Criadores.jsx";
+import PerfilCriadorPublico from "./pages/PerfilCriadorPublico.jsx";
+import "./creatorDirectory.css";
 
 // 1. Importe a nova tela de cadastro de produto aqui
 import CadastroProduto from "./pages/CadastroProduto.jsx";
@@ -69,6 +72,8 @@ function App() {
             <Route path="/store/produtos/novo" element={<CadastroProduto />} />
             
             <Route path="/dashboard/affiliate" element={<DashboardAfiliado />} />
+            <Route path="/criadores" element={<Criadores />} />
+            <Route path="/criadores/:userId" element={<PerfilCriadorPublico />} />
             <Route path="/creator/perfil" element={<PerfilCriadorView />} />
             <Route path="/creator/perfil/editar" element={<PerfilCriador />} />
             <Route path="/store/perfil" element={<PerfilLojistaView />} />
