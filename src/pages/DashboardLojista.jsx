@@ -1,84 +1,42 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { listarProdutosDaLoja } from "../auth/ProdutoClient.js";
 import Button from "../components/Button.jsx";
-
-const MONEY_FORMATTER = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
-function ProductImage({ product }) {
-  const [failed, setFailed] = useState(false);
-
-  if (product.imageUrl && !failed) {
-    return (
-      <img
-        className="commerce-product__image"
-        src={product.imageUrl}
-        alt={`Imagem de ${product.name}`}
-        onError={() => setFailed(true)}
-      />
-    );
-  }
-
-  return (
-    <div className="commerce-product__image commerce-product__image--fallback" aria-hidden="true">
-      MV
-    </div>
-  );
-}
+import { formatProductMoney, getStoreDashboard } from "../services/productService.js";
 
 function DashboardLojista() {
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const [products, setProducts] = useState([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [productsError, setProductsError] = useState("");
-  const [reloadKey, setReloadKey] = useState(0);
-  const nome = user?.name || user?.nome || "Lojista";
+  const nome = user?.name || user?.fullName || user?.nome || "Lojista";
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    let active = true;
-
-    async function loadProducts() {
-      if (!user?.id) {
-        setProductsError("Não foi possível identificar a loja conectada.");
-        setIsLoadingProducts(false);
-        return;
-      }
-
-      setIsLoadingProducts(true);
-      setProductsError("");
-
-      try {
-        const data = await listarProdutosDaLoja(user.id);
-        if (active) setProducts(data);
-      } catch (error) {
-        if (active) {
-          setProductsError(error.message || "Não foi possível carregar os produtos.");
+    getStoreDashboard()
+      .then(setDashboard)
+      .catch((err) => {
+        if (err.status === 401) {
+          navigate("/login", { replace: true });
+        } else {
+          setError(err.message || "Não foi possível carregar o dashboard.");
         }
-      } finally {
-        if (active) setIsLoadingProducts(false);
-      }
-    }
+      })
+      .finally(() => setLoading(false));
+  }, [navigate]);
 
-    loadProducts();
-
-    return () => {
-      active = false;
-    };
-  }, [reloadKey, user?.id]);
-
-  const stats = useMemo(() => {
-    const activeProducts = products.filter((product) => product.active !== false).length;
-
-    return [
-      { label: "Produtos cadastrados", value: String(products.length) },
-      { label: "Produtos ativos", value: String(activeProducts) },
-      { label: "Criadores parceiros", value: "0" },
-      { label: "Vendas do mês", value: "R$ 0,00" },
-    ];
-  }, [products]);
+  const stats = [
+    ["Produtos cadastrados", dashboard?.totalProducts ?? 0],
+    ["Produtos ativos", dashboard?.activeProducts ?? 0],
+    ["Produtos inativos", dashboard?.inactiveProducts ?? 0],
+    ["Vendas realizadas", dashboard?.totalSales ?? 0],
+    ["Valor total das vendas", formatProductMoney(dashboard?.totalSalesAmount)],
+    ["Contratações", dashboard?.totalHirings ?? 0],
+    ["Contratações pendentes", dashboard?.pendingHirings ?? 0],
+    ["Contratações ativas", dashboard?.activeHirings ?? 0],
+    ["Contratações concluídas", dashboard?.completedHirings ?? 0],
+  ];
 
   return (
     <div className="dashboard">
@@ -92,17 +50,19 @@ function DashboardLojista() {
             </p>
           </div>
           <div className="dashboard__actions">
-            <Button to="/store/produtos/novo" variant="primary">Cadastrar produto</Button>
+            <Button to="/store/produtos/novo" variant="primary">Cadastrar Produto</Button>
+            <Button to="/store/produtos">Gerenciar produtos</Button>
             <Button to="/criadores">Buscar criadores</Button>
             <Button to="/store/perfil" variant="secondary">Meu perfil</Button>
           </div>
         </header>
 
+        {error && <div className="dashboard-error">{error}</div>}
         <section className="dashboard__grid">
-          {stats.map((stat) => (
-            <div className="dashboard-card" key={stat.label}>
-              <p className="dashboard-card__label">{stat.label}</p>
-              <p className="dashboard-card__value">{stat.value}</p>
+          {stats.map(([label, value]) => (
+            <div className="dashboard-card" key={label}>
+              <p className="dashboard-card__label">{label}</p>
+              <p className="dashboard-card__value">{loading ? "..." : value}</p>
             </div>
           ))}
         </section>
@@ -116,49 +76,7 @@ function DashboardLojista() {
             <Button to="/store/produtos/novo" variant="secondary">Adicionar produto</Button>
           </div>
 
-          {isLoadingProducts ? (
-            <div className="commerce-state" aria-live="polite">
-              <span className="commerce-state__loader" aria-hidden="true" />
-              <p>Carregando os produtos da sua loja...</p>
-            </div>
-          ) : productsError ? (
-            <div className="commerce-state" role="alert">
-              <strong>Não foi possível carregar seus produtos.</strong>
-              <p>{productsError}</p>
-              <button type="button" className="commerce-action" onClick={() => setReloadKey((value) => value + 1)}>
-                Tentar novamente
-              </button>
-            </div>
-          ) : products.length === 0 ? (
-            <div className="commerce-state">
-              <strong>Sua vitrine ainda está vazia.</strong>
-              <p>Cadastre o primeiro produto para ele aparecer aqui e ficar disponível aos afiliados.</p>
-              <Button to="/store/produtos/novo">Cadastrar primeiro produto</Button>
-            </div>
-          ) : (
-            <div className="commerce-products">
-              {products.map((product) => (
-                <article className="commerce-product" key={product.id}>
-                  <ProductImage product={product} />
-                  <div className="commerce-product__content">
-                    <div className="commerce-product__heading">
-                      <div>
-                        <span className={`commerce-badge${product.active === false ? " commerce-badge--inactive" : ""}`}>
-                          {product.active === false ? "Inativo" : "Ativo"}
-                        </span>
-                        <h3>{product.name}</h3>
-                      </div>
-                      <strong>{MONEY_FORMATTER.format(Number(product.price) || 0)}</strong>
-                    </div>
-                    <p>
-                      Comissão para afiliados:{" "}
-                      <strong>{Number(product.commissionPercentage) || 0}%</strong>
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+          <p className="dashboard-empty">Acompanhe aqui o desempenho dos seus produtos e contratações.</p>
         </section>
 
         <section className="dashboard-section">
