@@ -27,31 +27,15 @@ function Navbar() {
 
   const renderMenuLinks = () => {
     if (!user) return null;
-    const tipo = user.tipo;
+    const tipo = user.profileType;
 
     return (
       <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--background)', padding: '0.25rem', borderRadius: '12px' }}>
         <Button to="/home">Home</Button>
         <Button to="/dashboard">Dashboard</Button>
         
-        {tipo === 'lojista' && (
-          <>
-            <Button to="/criadores">Criadores</Button>
-            <Button to="/afiliados">Afiliados</Button>
-          </>
-        )}
-
-        {tipo === 'criador' && (
-          <>
-            <Button to="/lojistas">Lojistas</Button>
-            <Button to="/afiliados">Afiliados</Button>
-          </>
-        )}
-
-        {tipo === 'afiliado' && (
-          <>
-            <Button to="/lojistas">Lojistas</Button>
-          </>
+        {tipo === 'STORE' && (
+          <Button to="/criadores">Criadores</Button>
         )}
       </div>
     );
